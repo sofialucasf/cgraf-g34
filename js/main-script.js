@@ -106,7 +106,9 @@ function handleCollisions() {}
 ////////////
 /* UPDATE */
 ////////////
-function update() {}
+function update() {
+    controls.update();
+}
 
 ////////////////////////////////
 /* INITIALIZE ANIMATION CYCLE */
@@ -130,15 +132,15 @@ function init() {
 /* DISPLAY */
 /////////////
 function render() {
-    renderer.render(scene, camera);
+    renderer.render(scene, activeCamera);
 }
 
 /////////////////////
 /* RENDER & ANIMATE */
 /////////////////////
 function animate() {
-    controls.update();
-    renderer.render(scene, activeCamera);
+    update();
+    render();
     requestAnimationFrame(animate);
 }
 
