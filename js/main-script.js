@@ -46,7 +46,7 @@ function createCameras() {
         window.innerHeight / 15, window.innerHeight / -15,
         1, 1000
     );
-    frontCamera.position.set(50, 0, 0);
+    frontCamera.position.set(0, 0, 50);
     frontCamera.lookAt(0, 0, 0);
 
     // Side Camera (Orthographic)
@@ -55,7 +55,7 @@ function createCameras() {
         window.innerHeight / 15, window.innerHeight / -15,
         1, 1000
     );
-    sideCamera.position.set(0, 0, 50);
+    sideCamera.position.set(50, 0, 0);
     sideCamera.lookAt(0, 0, 0);
 
     // Perspective Camera
@@ -168,13 +168,13 @@ function onWindowResize() {
 function onKeyDown(event) {
     switch (event.key.toLowerCase()) {
         case '1':
-            activeCamera = topCamera;
-            break;
-        case '2':
             activeCamera = frontCamera;
             break;
-        case '3':
+        case '2':
             activeCamera = sideCamera;
+            break;
+        case '3':
+            activeCamera = topCamera;
             break;
         case '4':
             activeCamera = perspectiveCamera;
