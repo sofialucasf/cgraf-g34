@@ -11,6 +11,35 @@ let topCamera, frontCamera, sideCamera, perspectiveCamera;
 let activeCamera;
 let controls;
 
+const COLORS = {
+    blue: {
+      light: 'lightblue',
+      normal: 'blue',
+      dark: 'darkblue'
+    },
+    red: {
+      light: 'lightcoral',
+      normal: 'firebrick',
+      dark: 'darkred'
+    },
+    grey: {
+      light: 'lightgray',
+      normal: 'gray',
+      dark: 'dimgray'
+    },
+    yellow: {
+      light: 'lightyellow',
+      normal: 'yellow',
+      dark: 'goldenrod'
+    },
+    black: {
+      tire: '#111111',   // Very dark gray, good for tires
+      dark: '#222222',   // Slightly lighter
+      normal: '#333333', // Still dark but visibly lighter
+      light: '#555555'   // Charcoal-like
+    }
+  };
+
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
@@ -22,6 +51,19 @@ function createScene() {
     scene.add(new THREE.AxesHelper(10));
 
     createRobotHead();
+    createRightArm();
+    createRightForearm();
+    createLeftArm();
+    createLeftForearm();
+    createRobotAbdomen();
+    createChest();
+    createHeadplacer();
+    createWaist();
+    createLeftThigh();
+    createRightThigh();
+    createLeftCalf();
+    createRightCalf();
+    
 
 }
 
@@ -81,17 +123,260 @@ function createRobotHead(){
     const geometryHead = new THREE.BoxGeometry(10, 10, 10);
     const material = new THREE.MeshBasicMaterial({ color: 0xdddddd});
     const cube = new THREE.Mesh(geometryHead, material);
+
+    head.position.set(0, 35, -35);
+
     const geometryEye = new THREE.BoxGeometry(1, 1, 1);
     const materialEye = new THREE.MeshBasicMaterial({ color: 0x21b7fc});
+
     const eye1 = new THREE.Mesh(geometryEye, materialEye);
-    eye1.position.set(2, 2, 5);
+    eye1.position.set(2, -2, -5);
+
     const eye2 = new THREE.Mesh(geometryEye, materialEye);
-    eye2.position.set(-2, 2, 5);
+    eye2.position.set(-2, -2, -5);
+
     head.add(cube);
     head.add(eye1);
     head.add(eye2);
     scene.add(head);
 }
+
+function createRightArm(){
+    const arm = new THREE.Object3D();
+    const geoArm= new THREE.BoxGeometry(20, 30, 20);
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
+    const cube = new THREE.Mesh(geoArm, colorArm);
+    cube.position.set(-20,25, -20);
+
+    arm.add(cube);
+
+    scene.add(arm);
+}
+
+function createRightForearm(){
+    const arm = new THREE.Object3D();
+    const geoArm= new THREE.BoxGeometry(20, 20, 60);
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
+    const cube = new THREE.Mesh(geoArm, colorArm);
+    cube.position.set(-20,0, 0);
+
+    const geoLight = new THREE.BoxGeometry(5, 2.5, 1);
+    const colorLight = new THREE.MeshBasicMaterial({ color: COLORS.yellow.normal});
+    const light = new THREE.Mesh(geoLight, colorLight);
+    light.position.set(0, 0, 30);
+
+    const geoDecor = new THREE.BoxGeometry(20, 1, 1);
+    const colorDecor = new THREE.MeshBasicMaterial({ color: COLORS.red.dark});
+    const decor = new THREE.Mesh(geoDecor, colorDecor);
+    decor.position.set(0, 10, 30);
+
+    cube.add(light);
+    cube.add(decor);
+    arm.add(cube);
+
+    scene.add(arm);
+}
+
+function createLeftArm(){
+    const arm = new THREE.Object3D();
+    const geoArm= new THREE.BoxGeometry(20, 30, 20);
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
+    const cube = new THREE.Mesh(geoArm, colorArm);
+    cube.position.set(20,25, -20);
+
+    arm.add(cube);
+
+    scene.add(arm);
+}
+
+function createLeftForearm(){
+
+    const arm = new THREE.Object3D();
+    const geoArm= new THREE.BoxGeometry(20, 20, 60);
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
+    const cube = new THREE.Mesh(geoArm, colorArm);
+    cube.position.set(20,0, 0);
+
+    const geoLight = new THREE.BoxGeometry(5, 2.5, 1);
+    const colorLight = new THREE.MeshBasicMaterial({ color: COLORS.yellow.normal});
+    const light = new THREE.Mesh(geoLight, colorLight);
+    light.position.set(0, 0, 30);
+
+    const geoDecor = new THREE.BoxGeometry(20, 1, 1);
+    const colorDecor = new THREE.MeshBasicMaterial({ color: COLORS.red.dark});
+    const decor = new THREE.Mesh(geoDecor, colorDecor);
+    decor.position.set(0, 10, 30);
+
+    cube.add(light);
+    cube.add(decor);
+    arm.add(cube);
+
+    scene.add(arm);
+}
+
+function createRobotAbdomen(){
+    const abdomen = new THREE.Object3D();
+    const geoAbdomen= new THREE.BoxGeometry(20, 20, 60);
+    const colorAbdomen = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const cube = new THREE.Mesh(geoAbdomen, colorAbdomen);
+    cube.position.set(0,0, 0);
+
+    const geoDecor = new THREE.BoxGeometry(20, 1, 1);
+    const colorDecor = new THREE.MeshBasicMaterial({ color: COLORS.grey.dark});
+    const decor = new THREE.Mesh(geoDecor, colorDecor);
+    decor.position.set(0, 10, 30);
+
+    cube.add(decor);
+    abdomen.add(cube);
+
+    scene.add(abdomen);
+}
+
+function createChest(){
+    const chest = new THREE.Object3D();
+    const geoChest= new THREE.BoxGeometry(60, 30, 40);
+    const colorChest = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
+    const cube = new THREE.Mesh(geoChest, colorChest);
+    cube.position.set(0,25, 10);
+
+    const geoWindow1 = new THREE.BoxGeometry(25, 20, 1);
+    const colorWindow1 = new THREE.MeshBasicMaterial({ color: COLORS.yellow.light});
+    const Window1 = new THREE.Mesh(geoWindow1, colorWindow1);
+    Window1.position.set(-15, 0, 20);
+
+    const geoWindow2 = new THREE.BoxGeometry(25, 20, 1);
+    const colorWindow2 = new THREE.MeshBasicMaterial({ color: COLORS.yellow.light});
+    const Window2 = new THREE.Mesh(geoWindow2, colorWindow2);
+    Window2.position.set(15, 0, 20);
+
+    cube.add(Window1);
+    cube.add(Window2);
+    chest.add(cube);
+    scene.add(chest);
+}
+
+function createHeadplacer(){
+    const arm = new THREE.Object3D();
+    const geoArm= new THREE.BoxGeometry(20, 30, 20);
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const cube = new THREE.Mesh(geoArm, colorArm);
+    cube.position.set(0,25, -20);
+
+    arm.add(cube);
+
+    scene.add(arm);
+}
+
+function createWaist(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(60, 10, 60);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(0,-15, 0);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
+    wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    wheelLeft.position.set(-30, -20, 20); 
+    
+
+    const wheelRight = new THREE.Mesh(geoWheel, colorWheel);
+    wheelRight.rotation.z = Math.PI / 2;
+    wheelRight.position.set(30, -20, 20);
+    
+    waist.add(wheelLeft);
+    waist.add(wheelRight);
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createLeftThigh(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(30, 30, 30);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(15,-5, -45);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
+    wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    wheelLeft.position.set(-30, -20, -45);    
+    
+    waist.add(wheelLeft);
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createRightThigh(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(30, 30, 30);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(-15,-5, -45);
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createLeftCalf(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(30, 30, 70);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(15,-5, -95);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const backWheel = new THREE.Mesh(geoWheel, colorWheel);
+    backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    backWheel.position.set(-30, -20, -115); 
+    
+
+    const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
+    frontWheel.rotation.z = Math.PI / 2;
+    frontWheel.position.set(-30, -20, -90);
+    
+    waist.add(backWheel);
+    waist.add(frontWheel);
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createRightCalf(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(30, 30, 70);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(-15,-5, -95);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const backWheel = new THREE.Mesh(geoWheel, colorWheel);
+    backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    backWheel.position.set(30, -20, -115); 
+    
+
+    const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
+    frontWheel.rotation.z = Math.PI / 2;
+    frontWheel.position.set(30, -20, -90);
+    
+    waist.add(backWheel);
+    waist.add(frontWheel);
+
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
 
 //////////////////////
 /* CHECK COLLISIONS */
