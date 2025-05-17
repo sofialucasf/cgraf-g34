@@ -296,7 +296,7 @@ function createWaist(){
 function createLeftThigh(){
     const waist = new THREE.Object3D();
     const geoWaist= new THREE.BoxGeometry(30, 30, 30);
-    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -45);
 
@@ -316,9 +316,18 @@ function createLeftThigh(){
 function createRightThigh(){
     const waist = new THREE.Object3D();
     const geoWaist= new THREE.BoxGeometry(30, 30, 30);
-    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(-15,-5, -45);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
+    wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    wheelLeft.position.set(30, -20, -45);    
+    
+    waist.add(wheelLeft);
 
     waist.add(cube);
     scene.add(waist);
