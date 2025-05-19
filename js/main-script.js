@@ -10,6 +10,11 @@ let scene, renderer;
 let topCamera, frontCamera, sideCamera, perspectiveCamera;
 let activeCamera;
 let controls;
+const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
+const rightArm = new THREE.Group(); // grupos para o movimento dos braços
+const leftArm = new THREE.Group();  //
+const lowerBody = new THREE.Group();     // grupo para o movimento das pernas
+const feet = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -38,7 +43,7 @@ const COLORS = {
       normal: '#333333', // Still dark but visibly lighter
       light: '#555555'   // Charcoal-like
     }
-  };
+};
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -50,20 +55,9 @@ function createScene() {
     // Axes Helper
     scene.add(new THREE.AxesHelper(10));
 
-    createRobotHead();
-    createRightArm();
-    createRightForearm();
-    createLeftArm();
-    createLeftForearm();
-    createRobotAbdomen();
-    createChest();
-    createHeadplacer();
-    createWaist();
-    createLeftThigh();
-    createRightThigh();
-    createLeftCalf();
-    createRightCalf();
-    
+    createRobot();
+    createTrailer();
+    createTrailerCar();
 
 }
 
@@ -138,7 +132,8 @@ function createRobotHead(){
     head.add(cube);
     head.add(eye1);
     head.add(eye2);
-    scene.add(head);
+    robotHead.add(head);
+    scene.add(robotHead);
 }
 
 function createRightArm(){
@@ -214,7 +209,7 @@ function createLeftForearm(){
     scene.add(arm);
 }
 
-function createRobotAbdomen(){
+function createAbdomen(){
     const abdomen = new THREE.Object3D();
     const geoAbdomen= new THREE.BoxGeometry(20, 20, 60);
     const colorAbdomen = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
@@ -258,7 +253,7 @@ function createChest(){
 function createHeadplacer(){
     const arm = new THREE.Object3D();
     const geoArm= new THREE.BoxGeometry(20, 30, 20);
-    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.grey.light} );
+    const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
     const cube = new THREE.Mesh(geoArm, colorArm);
     cube.position.set(0,25, -20);
 
@@ -386,6 +381,72 @@ function createRightCalf(){
     scene.add(waist);
 }
 
+function createTrailer(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(60, 60, 160);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(0,45, -140);
+
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createTrailerCar(){
+    const waist = new THREE.Object3D();
+    const geoWaist= new THREE.BoxGeometry(60, 30, 80);
+    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.light} );
+    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    cube.position.set(0,-5, -180);
+
+    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
+    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
+    
+    const backWheel = new THREE.Mesh(geoWheel, colorWheel);
+    backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    backWheel.position.set(30, -20, -205); 
+    
+
+    const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
+    frontWheel.rotation.z = Math.PI / 2;
+    frontWheel.position.set(30, -20, -180);
+    
+    waist.add(backWheel);
+    waist.add(frontWheel);
+
+    const backWheel2 = new THREE.Mesh(geoWheel, colorWheel);
+    backWheel2.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
+    backWheel2.position.set(-30, -20, -205); 
+    
+
+    const frontWheel2 = new THREE.Mesh(geoWheel, colorWheel);
+    frontWheel2.rotation.z = Math.PI / 2;
+    frontWheel2.position.set(-30, -20, -180);
+    
+    waist.add(backWheel2);
+    waist.add(frontWheel2);
+
+
+    waist.add(cube);
+    scene.add(waist);
+}
+
+function createRobot(){
+    createRobotHead();
+    createRightArm();
+    createRightForearm();
+    createLeftArm();
+    createLeftForearm();
+    createAbdomen();
+    createChest();
+    createHeadplacer();
+    createWaist();
+    createLeftThigh();
+    createRightThigh();
+    createLeftCalf();
+    createRightCalf();
+}
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -400,8 +461,27 @@ function handleCollisions() {}
 ////////////
 /* UPDATE */
 ////////////
+
+let targetYRotation = Math.PI / 2; // 90 degrees in radians
+let rotationSpeed = 0.02; // Adjust for speed
+let rotating = true;
+
+
 function update() {
     controls.update();
+    if (rotating) {
+        //robotHead.rotation.x += 0.04;
+        //console.log(robotHead.rotation.x);
+        // const remaining = targetYRotation - robotHead.rotation.y;
+        // if (Math.abs(remaining) > 0.001) {
+        //   //const step = Math.min(rotationSpeed, Math.abs(remaining));
+        //   const step = 0.04;
+        //   robotHead.rotation.y += Math.sign(remaining) * step;
+        // } else {
+        //   robotHead.rotation.y = targetYRotation;
+        //   rotating = false;
+        // }
+    }
 }
 
 ////////////////////////////////
