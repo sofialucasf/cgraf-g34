@@ -144,8 +144,8 @@ function createRightArm(){
     cube.position.set(-20,25, -20);
 
     arm.add(cube);
-
-    scene.add(arm);
+    rightArm.add(arm);
+    scene.add(rightArm);
 }
 
 function createRightForearm(){
@@ -169,7 +169,9 @@ function createRightForearm(){
     cube.add(decor);
     arm.add(cube);
 
-    scene.add(arm);
+    rightArm.add(arm);
+    scene.add(rightArm);
+
 }
 
 function createLeftArm(){
@@ -181,7 +183,9 @@ function createLeftArm(){
 
     arm.add(cube);
 
-    scene.add(arm);
+    leftArm.add(arm);
+    scene.add(leftArm);
+
 }
 
 function createLeftForearm(){
@@ -206,7 +210,8 @@ function createLeftForearm(){
     cube.add(decor);
     arm.add(cube);
 
-    scene.add(arm);
+    leftArm.add(arm);
+    scene.add(leftArm);
 }
 
 function createAbdomen(){
@@ -295,17 +300,21 @@ function createLeftThigh(){
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -45);
 
+
+
     const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
     const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
     
     const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
     wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    wheelLeft.position.set(-30, -20, -45);    
+    wheelLeft.position.set(30, -20, -45);    
     
     waist.add(wheelLeft);
 
     waist.add(cube);
-    scene.add(waist);
+
+    lowerBody.add(waist);
+    scene.add(lowerBody);
 }
 
 function createRightThigh(){
@@ -320,12 +329,13 @@ function createRightThigh(){
     
     const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
     wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    wheelLeft.position.set(30, -20, -45);    
+    wheelLeft.position.set(-30, -20, -45);    
     
     waist.add(wheelLeft);
 
     waist.add(cube);
-    scene.add(waist);
+    lowerBody.add(waist);
+    scene.add(lowerBody);
 }
 
 function createLeftCalf(){
@@ -351,7 +361,8 @@ function createLeftCalf(){
     waist.add(frontWheel);
 
     waist.add(cube);
-    scene.add(waist);
+    lowerBody.add(waist);
+    scene.add(lowerBody);
 }
 
 function createRightCalf(){
@@ -378,7 +389,8 @@ function createRightCalf(){
 
 
     waist.add(cube);
-    scene.add(waist);
+    lowerBody.add(waist);
+    scene.add(lowerBody);
 }
 
 function createTrailer(){
@@ -470,7 +482,7 @@ let rotating = true;
 function update() {
     controls.update();
     if (rotating) {
-        //robotHead.rotation.x += 0.04;
+        //lowerBody.rotation.x += 0.04;
         //console.log(robotHead.rotation.x);
         // const remaining = targetYRotation - robotHead.rotation.y;
         // if (Math.abs(remaining) > 0.001) {
