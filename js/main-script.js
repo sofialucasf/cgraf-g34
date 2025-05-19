@@ -350,12 +350,12 @@ function createLeftCalf(){
     
     const backWheel = new THREE.Mesh(geoWheel, colorWheel);
     backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    backWheel.position.set(-30, -20, -115); 
+    backWheel.position.set(30, -20, -115); 
     
 
     const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
     frontWheel.rotation.z = Math.PI / 2;
-    frontWheel.position.set(-30, -20, -90);
+    frontWheel.position.set(30, -20, -90);
     
     waist.add(backWheel);
     waist.add(frontWheel);
@@ -377,12 +377,12 @@ function createRightCalf(){
     
     const backWheel = new THREE.Mesh(geoWheel, colorWheel);
     backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    backWheel.position.set(30, -20, -115); 
+    backWheel.position.set(-30, -20, -115); 
     
 
     const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
     frontWheel.rotation.z = Math.PI / 2;
-    frontWheel.position.set(30, -20, -90);
+    frontWheel.position.set(-30, -20, -90);
     
     waist.add(backWheel);
     waist.add(frontWheel);
