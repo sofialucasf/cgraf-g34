@@ -10,6 +10,12 @@ let scene, renderer;
 let topCamera, frontCamera, sideCamera, perspectiveCamera;
 let activeCamera;
 let controls;
+let rotatingWaistLeft = false;
+let rotatingWaistRight = false;
+let lowerBodyPivot;
+const waistRotationSpeed = 0.03;
+const WAIST_ROTATION_MIN = -Math.PI / 2;
+const WAIST_ROTATION_MAX = 0;
 const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
 const rightArm = new THREE.Group(); // grupos para o movimento dos braços
 const leftArm = new THREE.Group();  //
@@ -69,8 +75,8 @@ function createCameras() {
 
     // Top Camera (Orthographic)
     topCamera = new THREE.OrthographicCamera(
-        window.innerWidth / -15, window.innerWidth / 15,
-        window.innerHeight / 15, window.innerHeight / -15,
+        window.innerWidth / -5, window.innerWidth / 5,
+        window.innerHeight / 5, window.innerHeight / -5,
         1, 1000
     );
     topCamera.position.set(0, 50, 0);
@@ -78,8 +84,8 @@ function createCameras() {
 
     // Front Camera (Orthographic)
     frontCamera = new THREE.OrthographicCamera(
-        window.innerWidth / -15, window.innerWidth / 15,
-        window.innerHeight / 15, window.innerHeight / -15,
+        window.innerWidth / -5, window.innerWidth / 5,
+        window.innerHeight / 5, window.innerHeight / -5,
         1, 1000
     );
     frontCamera.position.set(0, 0, 50);
@@ -87,8 +93,8 @@ function createCameras() {
 
     // Side Camera (Orthographic)
     sideCamera = new THREE.OrthographicCamera(
-        window.innerWidth / -15, window.innerWidth / 15,
-        window.innerHeight / 15, window.innerHeight / -15,
+        window.innerWidth / -5, window.innerWidth / 5,
+        window.innerHeight / 5, window.innerHeight / -5,
         1, 1000
     );
     sideCamera.position.set(50, 0, 0);
@@ -96,7 +102,7 @@ function createCameras() {
 
     // Perspective Camera
     perspectiveCamera = new THREE.PerspectiveCamera(70, aspect, 1, 1000);
-    perspectiveCamera.position.set(50, 50, 50);
+    perspectiveCamera.position.set(100, 100, 100);
     perspectiveCamera.lookAt(0, 0, 0);
 
     // Start with Perspective
@@ -267,6 +273,7 @@ function createHeadplacer(){
     scene.add(arm);
 }
 
+let waistObj = null;
 function createWaist(){
     const waist = new THREE.Object3D();
     const geoWaist= new THREE.BoxGeometry(60, 10, 60);
@@ -291,6 +298,8 @@ function createWaist(){
 
     waist.add(cube);
     scene.add(waist);
+
+    waistObj = waist;
 }
 
 function createLeftThigh(){
@@ -314,7 +323,6 @@ function createLeftThigh(){
     waist.add(cube);
 
     lowerBody.add(waist);
-    scene.add(lowerBody);
 }
 
 function createRightThigh(){
@@ -335,7 +343,6 @@ function createRightThigh(){
 
     waist.add(cube);
     lowerBody.add(waist);
-    scene.add(lowerBody);
 }
 
 function createLeftCalf(){
@@ -362,7 +369,6 @@ function createLeftCalf(){
 
     waist.add(cube);
     lowerBody.add(waist);
-    scene.add(lowerBody);
 }
 
 function createRightCalf(){
@@ -390,7 +396,19 @@ function createRightCalf(){
 
     waist.add(cube);
     lowerBody.add(waist);
+}
+
+function createLowerBody(){
+    const rightThigh = createRightThigh();
+    const leftThigh = createLeftThigh();
+    const rightCalf = createRightCalf();
+    const leftCalf = createLeftCalf();
     scene.add(lowerBody);
+    lowerBodyPivot = new THREE.Object3D();
+    scene.add(lowerBodyPivot);
+    lowerBodyPivot.position.set(0, 5, -5);
+    lowerBody.position.set(0, -5, 5);
+    lowerBodyPivot.add(lowerBody);
 }
 
 function createTrailer(){
@@ -454,10 +472,7 @@ function createRobot(){
     createChest();
     createHeadplacer();
     createWaist();
-    createLeftThigh();
-    createRightThigh();
-    createLeftCalf();
-    createRightCalf();
+    createLowerBody();
 }
 
 //////////////////////
@@ -473,26 +488,17 @@ function handleCollisions() {}
 ////////////
 /* UPDATE */
 ////////////
-
-let targetYRotation = Math.PI / 2; // 90 degrees in radians
-let rotationSpeed = 0.02; // Adjust for speed
-let rotating = true;
-
-
 function update() {
     controls.update();
-    if (rotating) {
-        //lowerBody.rotation.x += 0.04;
-        //console.log(robotHead.rotation.x);
-        // const remaining = targetYRotation - robotHead.rotation.y;
-        // if (Math.abs(remaining) > 0.001) {
-        //   //const step = Math.min(rotationSpeed, Math.abs(remaining));
-        //   const step = 0.04;
-        //   robotHead.rotation.y += Math.sign(remaining) * step;
-        // } else {
-        //   robotHead.rotation.y = targetYRotation;
-        //   rotating = false;
-        // }
+    if (lowerBodyPivot) {
+        const originalPosition = lowerBody.position.clone();
+
+        if (rotatingWaistLeft) {
+            lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + waistRotationSpeed, WAIST_ROTATION_MAX);
+        }
+        if (rotatingWaistRight) {
+            lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - waistRotationSpeed, WAIST_ROTATION_MIN);
+        }
     }
 }
 
@@ -511,6 +517,7 @@ function init() {
 
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener('keydown', onKeyDown, false);
+    window.addEventListener('keyup', onKeyUp, false);
 }
 
 
@@ -566,6 +573,23 @@ function onKeyDown(event) {
             break;
         case '4':
             activeCamera = perspectiveCamera;
+            break;
+         case 'w':
+            rotatingWaistLeft = true;
+            break;
+        case 's':
+            rotatingWaistRight = true;
+            break;
+    }
+}
+
+function onKeyUp(event) {
+    switch (event.key.toLowerCase()) {
+        case 'w':
+            rotatingWaistLeft = false;
+            break;
+        case 's':
+            rotatingWaistRight = false;
             break;
     }
 }
