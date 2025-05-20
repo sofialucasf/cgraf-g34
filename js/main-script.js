@@ -13,7 +13,10 @@ let controls;
 let rotatingWaistLeft = false;
 let rotatingWaistRight = false;
 let lowerBodyPivot;
-const waistRotationSpeed = 0.03;
+let feetPivot;
+let rotatingFeetUp = false;
+let rotatingFeetDown = false;
+const rotationSpeed = 0.03;
 const WAIST_ROTATION_MIN = -Math.PI / 2;
 const WAIST_ROTATION_MAX = 0;
 const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
@@ -305,42 +308,23 @@ function createWaist(){
 
 function createLeftThigh(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(30, 30, 30);
+    const geoWaist= new THREE.BoxGeometry(29.9, 30, 29.9);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -45);
 
 
 
-    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
-    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
-    
-    const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
-    wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    wheelLeft.position.set(30, -20, -45);    
-    
-    waist.add(wheelLeft);
-
     waist.add(cube);
-
     lowerBody.add(waist);
 }
 
 function createRightThigh(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(30, 30, 30);
+    const geoWaist= new THREE.BoxGeometry(29.9, 30, 29.9);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(-15,-5, -45);
-
-    const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
-    const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
-    
-    const wheelLeft = new THREE.Mesh(geoWheel, colorWheel);
-    wheelLeft.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    wheelLeft.position.set(-30, -20, -45);    
-    
-    waist.add(wheelLeft);
 
     waist.add(cube);
     lowerBody.add(waist);
@@ -400,10 +384,11 @@ function createRightCalf(){
 }
 
 function createLowerBody(){
-    const rightThigh = createRightThigh();
-    const leftThigh = createLeftThigh();
-    const rightCalf = createRightCalf();
-    const leftCalf = createLeftCalf();
+    createRightThigh();
+    createLeftThigh();
+    createRightCalf();
+    createLeftCalf();
+    createFeet();
     scene.add(lowerBody);
     lowerBodyPivot = new THREE.Object3D();
     scene.add(lowerBodyPivot);
@@ -418,7 +403,7 @@ function createFeet(){
     const leftFoot = new THREE.Object3D();
 
     const geoFeet= new THREE.BoxGeometry(30, 30, 10);
-    const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
+    const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.blue.normal} );
     const rf = new THREE.Mesh(geoFeet, colorFeet);
     const lf = new THREE.Mesh(geoFeet, colorFeet);
 
@@ -428,9 +413,14 @@ function createFeet(){
 
     robotFeet.add(rf);
     robotFeet.add(lf);
-    lowerBody.add(rf);
-    lowerBody.add(lf);
-    scene.add(robotFeet);
+    lowerBody.add(robotFeet);
+    feetPivot = new THREE.Object3D();
+    scene.add(feetPivot);
+    feetPivot.position.set(0, -20, -130);
+    robotFeet.position.set(0, 20, 130);
+    feetPivot.add(robotFeet);
+    lowerBody.add(feetPivot);
+
 }
 
 function createTrailer(){
@@ -521,15 +511,22 @@ function handleCollisions() {}
 function update() {
     controls.update();
     if (lowerBodyPivot) {
-        const originalPosition = lowerBody.position.clone();
-
         if (rotatingWaistLeft) {
-            lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + waistRotationSpeed, WAIST_ROTATION_MAX);
+            lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + rotationSpeed, WAIST_ROTATION_MAX);
         }
         if (rotatingWaistRight) {
-            lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - waistRotationSpeed, WAIST_ROTATION_MIN);
+            lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
         }
     }
+
+    if (feetPivot) {
+        if (rotatingFeetUp) {
+            feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
+        }
+        if (rotatingFeetDown) {
+            feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
+        }
+    }   
 }
 
 ////////////////////////////////
@@ -610,6 +607,13 @@ function onKeyDown(event) {
         case 's':
             rotatingWaistRight = true;
             break;
+        case 'q':
+            console.log(robotFeet.position);
+            rotatingFeetUp = true;
+            break;
+        case 'a':
+            rotatingFeetDown = true;
+            break;
     }
 }
 
@@ -620,6 +624,12 @@ function onKeyUp(event) {
             break;
         case 's':
             rotatingWaistRight = false;
+            break;
+        case 'q':
+            rotatingFeetUp = false;
+            break;
+        case 'a':
+            rotatingFeetDown = false;
             break;
     }
 }
