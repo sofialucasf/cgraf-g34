@@ -16,7 +16,13 @@ let lowerBodyPivot;
 let feetPivot;
 let rotatingFeetUp = false;
 let rotatingFeetDown = false;
+let headPivot;
+let rotatingHeadUp = false;
+let rotatingHeadDown = false;
+let movingArmsOut = false;
+let movingArmsBack = false;
 const rotationSpeed = 0.03;
+const movingSpeed = 0.2;
 const WAIST_ROTATION_MIN = -Math.PI / 2;
 const WAIST_ROTATION_MAX = 0;
 const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
@@ -124,31 +130,47 @@ function createCameras() {
 
 function createRobotHead(){
     const head = new THREE.Object3D();
-    const geometryHead = new THREE.BoxGeometry(10, 10, 10);
+    const geometryHead = new THREE.BoxGeometry(20, 20, 20);
     const material = new THREE.MeshBasicMaterial({ color: 0xdddddd});
     const cube = new THREE.Mesh(geometryHead, material);
 
-    head.position.set(0, 35, -35);
+    head.position.set(0, 30, -40);
 
-    const geometryEye = new THREE.BoxGeometry(1, 1, 1);
+    const geometryEye = new THREE.BoxGeometry(3, 3, 1);
     const materialEye = new THREE.MeshBasicMaterial({ color: 0x21b7fc});
 
+    const geometryAntenna = new THREE.CylinderGeometry(0.5, 0.5, 8, 32);
+    const materialAntenna = new THREE.MeshBasicMaterial({ color: COLORS.red.dark});
+
+    const antenna1 = new THREE.Mesh(geometryAntenna, materialAntenna);
+    antenna1.position.set(5, -12, 0);
+
+    const antenna2 = new THREE.Mesh(geometryAntenna, materialAntenna);
+    antenna2.position.set(-5, -12, 0);
+
     const eye1 = new THREE.Mesh(geometryEye, materialEye);
-    eye1.position.set(2, -2, -5);
+    eye1.position.set(4, -2, -10);
 
     const eye2 = new THREE.Mesh(geometryEye, materialEye);
-    eye2.position.set(-2, -2, -5);
+    eye2.position.set(-4, -2, -10);
 
     head.add(cube);
     head.add(eye1);
     head.add(eye2);
+    head.add(antenna1);
+    head.add(antenna2);
     robotHead.add(head);
     scene.add(robotHead);
+    headPivot = new THREE.Object3D();
+    scene.add(headPivot);
+    headPivot.position.set(0, 40, -20);
+    head.position.set(0, 30-40, -40 + 20);
+    headPivot.add(head);
 }
 
 function createRightArm(){
     const arm = new THREE.Object3D();
-    const geoArm= new THREE.BoxGeometry(20, 30, 20);
+    const geoArm= new THREE.BoxGeometry(20 - 0.1, 30 - 0.1, 20 - 0.1);
     const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoArm, colorArm);
     cube.position.set(-20,25, -20);
@@ -186,7 +208,7 @@ function createRightForearm(){
 
 function createLeftArm(){
     const arm = new THREE.Object3D();
-    const geoArm= new THREE.BoxGeometry(20, 30, 20);
+    const geoArm= new THREE.BoxGeometry(20 - 0.1, 30 - 0.1, 20 - 0.1);
     const colorArm = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoArm, colorArm);
     cube.position.set(20,25, -20);
@@ -516,7 +538,6 @@ function update() {
             lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
         }
     }
-
     if (feetPivot) {
         if (rotatingFeetUp) {
             feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
@@ -524,7 +545,30 @@ function update() {
         if (rotatingFeetDown) {
             feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
         }
-    }   
+    }
+    if (headPivot) {
+        if (rotatingHeadUp) {
+            headPivot.rotation.x = Math.max(headPivot.rotation.x - rotationSpeed, 0);
+        }
+        if (rotatingHeadDown) {
+            headPivot.rotation.x = Math.min(headPivot.rotation.x + rotationSpeed, Math.PI);
+        }
+    }
+    if(rightArm && leftArm){
+        if (movingArmsOut) {
+            rightArm.position.z = Math.min(rightArm.position.z + movingSpeed, 20);
+            rightArm.position.x = Math.max(rightArm.position.x - movingSpeed, -20);
+            leftArm.position.z = Math.min(leftArm.position.z + movingSpeed, 20);
+            leftArm.position.x = Math.min(leftArm.position.x + movingSpeed, 20);
+        }
+        if (movingArmsBack) {
+            rightArm.position.z = Math.max(rightArm.position.z - movingSpeed, 0);
+            rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
+            leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
+            leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
+        }
+    }
+
 }
 
 ////////////////////////////////
@@ -612,6 +656,18 @@ function onKeyDown(event) {
         case 'a':
             rotatingFeetDown = true;
             break;
+        case 'r':
+            rotatingHeadUp = true;
+            break;
+        case 'f':
+            rotatingHeadDown = true;
+            break;
+        case 'e':
+            movingArmsBack = true;
+            break;
+        case 'd':
+            movingArmsOut = true;
+            break;
     }
 }
 
@@ -628,6 +684,18 @@ function onKeyUp(event) {
             break;
         case 'a':
             rotatingFeetDown = false;
+            break;
+        case 'r':
+            rotatingHeadUp = false;
+            break;
+        case 'f':
+            rotatingHeadDown = false;
+            break;
+        case 'e':
+            movingArmsBack = false;
+            break;
+        case 'd':
+            movingArmsOut = false;
             break;
     }
 }
