@@ -313,8 +313,6 @@ function createLeftThigh(){
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -45);
 
-
-
     waist.add(cube);
     lowerBody.add(waist);
 }
