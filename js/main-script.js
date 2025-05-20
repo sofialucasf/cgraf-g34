@@ -401,7 +401,7 @@ function createFeet(){
     const leftFoot = new THREE.Object3D();
 
     const geoFeet= new THREE.BoxGeometry(30, 30, 10);
-    const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.blue.normal} );
+    const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const rf = new THREE.Mesh(geoFeet, colorFeet);
     const lf = new THREE.Mesh(geoFeet, colorFeet);
 
