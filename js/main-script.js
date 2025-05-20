@@ -20,7 +20,7 @@ const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
 const rightArm = new THREE.Group(); // grupos para o movimento dos braços
 const leftArm = new THREE.Group();  //
 const lowerBody = new THREE.Group();     // grupo para o movimento das pernas
-const feet = new THREE.Group();
+const robotFeet = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -62,6 +62,7 @@ function createScene() {
     scene.add(new THREE.AxesHelper(10));
 
     createRobot();
+    createFeet();
     createTrailer();
     createTrailerCar();
 
@@ -411,15 +412,44 @@ function createLowerBody(){
     lowerBodyPivot.add(lowerBody);
 }
 
+function createFeet(){
+
+    const rightFoot = new THREE.Object3D();
+    const leftFoot = new THREE.Object3D();
+
+    const geoFeet= new THREE.BoxGeometry(30, 30, 10);
+    const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
+    const rf = new THREE.Mesh(geoFeet, colorFeet);
+    const lf = new THREE.Mesh(geoFeet, colorFeet);
+
+    rf.position.set(15,-5, -135);
+    lf.position.set(-15,-5, -135);
+
+
+    robotFeet.add(rf);
+    robotFeet.add(lf);
+    lowerBody.add(rf);
+    lowerBody.add(lf);
+    scene.add(robotFeet);
+}
+
 function createTrailer(){
     const waist = new THREE.Object3D();
     const geoWaist= new THREE.BoxGeometry(60, 60, 160);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal} );
+    //const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal,wireframe: true} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
-    cube.position.set(0,45, -140);
+    cube.position.set(0,40, -140);
+
+    const connection = new THREE.Object3D();
+    const geoConnection= new THREE.BoxGeometry(60, 10, 10);
+    const colorConnection = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
+    const c = new THREE.Mesh(geoConnection, colorConnection);
+    c.position.set(0,15, -55);
 
 
     waist.add(cube);
+    waist.add(c);
     scene.add(waist);
 }
 
