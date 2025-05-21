@@ -25,6 +25,7 @@ let rotatingHeadDown = false;
 
 let movingArmsOut = false;
 let movingArmsBack = false;
+let isWireframe = false;
 
 let movingUp = false;
 let movingDown = false;
@@ -41,6 +42,7 @@ const leftArm = new THREE.Group();  //
 const lowerBody = new THREE.Group();     // grupo para o movimento das pernas
 const robotFeet = new THREE.Group();
 const trailer = new THREE.Group();
+const restRobot = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -277,8 +279,9 @@ function createAbdomen(){
 
     cube.add(decor);
     abdomen.add(cube);
+    restRobot.add(abdomen);
 
-    scene.add(abdomen);
+    
 }
 
 function createChest(){
@@ -301,7 +304,7 @@ function createChest(){
     cube.add(Window1);
     cube.add(Window2);
     chest.add(cube);
-    scene.add(chest);
+    restRobot.add(chest);
 }
 
 function createHeadplacer(){
@@ -312,8 +315,8 @@ function createHeadplacer(){
     cube.position.set(0,25, -20);
 
     arm.add(cube);
+    restRobot.add(arm);
 
-    scene.add(arm);
 }
 
 let waistObj = null;
@@ -340,7 +343,8 @@ function createWaist(){
     waist.add(wheelRight);
 
     waist.add(cube);
-    scene.add(waist);
+    restRobot.add(waist);
+    scene.add(restRobot);
 
     waistObj = waist;
 }
@@ -622,6 +626,133 @@ function update() {
 
 }
 
+function toggleWireframe(){
+    if(isWireframe){
+        trailer.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        lowerBody.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        leftArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        rightArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        headPivot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        restRobot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+    }
+
+    else if(!isWireframe){
+        trailer.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        lowerBody.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        rightArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        leftArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        headPivot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        restRobot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+    }
+
+}
+
 ////////////////////////////////
 /* INITIALIZE ANIMATION CYCLE */
 ////////////////////////////////
@@ -730,6 +861,10 @@ function onKeyDown(event) {
             break;
         case 'arrowright':
             movingRight = true;
+            break;
+        case '7':
+            isWireframe = !isWireframe;
+            toggleWireframe();
             break;
     }
 }
