@@ -21,6 +21,7 @@ let rotatingHeadUp = false;
 let rotatingHeadDown = false;
 let movingArmsOut = false;
 let movingArmsBack = false;
+let isWireframe = false;
 const rotationSpeed = 0.03;
 const movingSpeed = 0.2;
 const WAIST_ROTATION_MIN = -Math.PI / 2;
@@ -30,6 +31,8 @@ const rightArm = new THREE.Group(); // grupos para o movimento dos braços
 const leftArm = new THREE.Group();  //
 const lowerBody = new THREE.Group();     // grupo para o movimento das pernas
 const robotFeet = new THREE.Group();
+const trailer = new THREE.Group();
+const restRobot = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -267,8 +270,9 @@ function createAbdomen(){
 
     cube.add(decor);
     abdomen.add(cube);
+    restRobot.add(abdomen);
 
-    scene.add(abdomen);
+    
 }
 
 function createChest(){
@@ -291,7 +295,7 @@ function createChest(){
     cube.add(Window1);
     cube.add(Window2);
     chest.add(cube);
-    scene.add(chest);
+    restRobot.add(chest);
 }
 
 function createHeadplacer(){
@@ -302,8 +306,8 @@ function createHeadplacer(){
     cube.position.set(0,25, -20);
 
     arm.add(cube);
+    restRobot.add(arm);
 
-    scene.add(arm);
 }
 
 let waistObj = null;
@@ -330,7 +334,8 @@ function createWaist(){
     waist.add(wheelRight);
 
     waist.add(cube);
-    scene.add(waist);
+    restRobot.add(waist);
+    scene.add(restRobot);
 
     waistObj = waist;
 }
@@ -467,7 +472,8 @@ function createTrailer(){
 
     waist.add(cube);
     waist.add(c);
-    scene.add(waist);
+    trailer.add(waist);
+    //scene.add(waist);
 }
 
 function createTrailerCar(){
@@ -506,7 +512,8 @@ function createTrailerCar(){
 
 
     waist.add(cube);
-    scene.add(waist);
+    trailer.add(waist);
+    scene.add(trailer);
 }
 
 function createRobot(){
@@ -574,6 +581,133 @@ function update() {
             leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
             leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
         }
+    }
+
+}
+
+function toggleWireframe(){
+    if(isWireframe){
+        trailer.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        lowerBody.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        leftArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        rightArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        headPivot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        restRobot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = isWireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+    }
+
+    else if(!isWireframe){
+        trailer.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        lowerBody.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        rightArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        leftArm.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        headPivot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
+
+        restRobot.traverse(function(child) {
+            if (child.isMesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = !mat.wireframe);
+                } else {
+                    child.material.wireframe = isWireframe;
+                }
+            }
+        });
     }
 
 }
@@ -674,6 +808,10 @@ function onKeyDown(event) {
             break;
         case 'd':
             movingArmsOut = true;
+            break;
+        case '7':
+            isWireframe = !isWireframe;
+            toggleWireframe();
             break;
     }
 }
