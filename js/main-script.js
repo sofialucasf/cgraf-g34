@@ -140,13 +140,18 @@ function createRobotHead(){
     const materialEye = new THREE.MeshBasicMaterial({ color: 0x21b7fc});
 
     const geometryAntenna = new THREE.CylinderGeometry(0.5, 0.5, 8, 32);
+    const geometryAntennaSphere = new THREE.SphereGeometry(1, 32, 32);
     const materialAntenna = new THREE.MeshBasicMaterial({ color: COLORS.red.dark});
 
     const antenna1 = new THREE.Mesh(geometryAntenna, materialAntenna);
     antenna1.position.set(5, -12, 0);
+    const antenna1Sphere = new THREE.Mesh(geometryAntennaSphere, materialAntenna);
+    antenna1Sphere.position.set(5, -16, 0);
 
     const antenna2 = new THREE.Mesh(geometryAntenna, materialAntenna);
     antenna2.position.set(-5, -12, 0);
+    const antenna2Sphere = new THREE.Mesh(geometryAntennaSphere, materialAntenna);
+    antenna2Sphere.position.set(-5, -16, 0);
 
     const eye1 = new THREE.Mesh(geometryEye, materialEye);
     eye1.position.set(4, -2, -10);
@@ -159,6 +164,8 @@ function createRobotHead(){
     head.add(eye2);
     head.add(antenna1);
     head.add(antenna2);
+    head.add(antenna1Sphere);
+    head.add(antenna2Sphere);
     robotHead.add(head);
     scene.add(robotHead);
     headPivot = new THREE.Object3D();
@@ -330,7 +337,7 @@ function createWaist(){
 
 function createLeftThigh(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(29.9, 30, 29.9);
+    const geoWaist= new THREE.BoxGeometry(27 - 0.1, 30 - 0.1, 30 - 0.1);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -45);
@@ -341,7 +348,7 @@ function createLeftThigh(){
 
 function createRightThigh(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(29.9, 30, 29.9);
+    const geoWaist= new THREE.BoxGeometry(27 - 0.1, 30 - 0.1, 30 - 0.1);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(-15,-5, -45);
@@ -352,7 +359,7 @@ function createRightThigh(){
 
 function createLeftCalf(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(30, 30, 70);
+    const geoWaist= new THREE.BoxGeometry(25, 25, 70);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(15,-5, -95);
@@ -378,7 +385,7 @@ function createLeftCalf(){
 
 function createRightCalf(){
     const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(30, 30, 70);
+    const geoWaist= new THREE.BoxGeometry(25, 25, 70);
     const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.normal} );
     const cube = new THREE.Mesh(geoWaist, colorWaist);
     cube.position.set(-15,-5, -95);
@@ -422,7 +429,7 @@ function createFeet(){
     const rightFoot = new THREE.Object3D();
     const leftFoot = new THREE.Object3D();
 
-    const geoFeet= new THREE.BoxGeometry(30, 30, 10);
+    const geoFeet= new THREE.BoxGeometry(25 - 0.1, 25 - 0.1, 10 - 0.1);
     const colorFeet = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const rf = new THREE.Mesh(geoFeet, colorFeet);
     const lf = new THREE.Mesh(geoFeet, colorFeet);
@@ -436,8 +443,8 @@ function createFeet(){
     lowerBody.add(robotFeet);
     feetPivot = new THREE.Object3D();
     scene.add(feetPivot);
-    feetPivot.position.set(0, -20, -130);
-    robotFeet.position.set(0, 20, 130);
+    feetPivot.position.set(0, -15, -130);
+    robotFeet.position.set(0, 15, 130);
     feetPivot.add(robotFeet);
     lowerBody.add(feetPivot);
 
