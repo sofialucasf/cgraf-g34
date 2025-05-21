@@ -10,17 +10,27 @@ let scene, renderer;
 let topCamera, frontCamera, sideCamera, perspectiveCamera;
 let activeCamera;
 let controls;
+
 let rotatingWaistLeft = false;
 let rotatingWaistRight = false;
 let lowerBodyPivot;
+
 let feetPivot;
 let rotatingFeetUp = false;
 let rotatingFeetDown = false;
+
 let headPivot;
 let rotatingHeadUp = false;
 let rotatingHeadDown = false;
+
 let movingArmsOut = false;
 let movingArmsBack = false;
+
+let movingUp = false;
+let movingDown = false;
+let movingRight = false;
+let movingLeft = false;
+
 const rotationSpeed = 0.03;
 const movingSpeed = 0.2;
 const WAIST_ROTATION_MIN = -Math.PI / 2;
@@ -30,6 +40,7 @@ const rightArm = new THREE.Group(); // grupos para o movimento dos braços
 const leftArm = new THREE.Group();  //
 const lowerBody = new THREE.Group();     // grupo para o movimento das pernas
 const robotFeet = new THREE.Group();
+const trailer = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -72,8 +83,7 @@ function createScene() {
 
     createRobot();
     createFeet();
-    createTrailer();
-    createTrailerCar();
+    createTrailerAll();
 
 }
 
@@ -87,28 +97,28 @@ function createCameras() {
     topCamera = new THREE.OrthographicCamera(
         window.innerWidth / -5, window.innerWidth / 5,
         window.innerHeight / 5, window.innerHeight / -5,
-        1, 1000
+        0.1, 1000
     );
-    topCamera.position.set(0, 50, 0);
-    topCamera.lookAt(0, 0, 0);
+    topCamera.position.set(0, 100, -90);
+    topCamera.lookAt(0, 0, -90);
 
     // Front Camera (Orthographic)
     frontCamera = new THREE.OrthographicCamera(
         window.innerWidth / -5, window.innerWidth / 5,
         window.innerHeight / 5, window.innerHeight / -5,
-        1, 1000
+        0.1, 1000
     );
-    frontCamera.position.set(0, 0, 50);
+    frontCamera.position.set(0, 0, 100);
     frontCamera.lookAt(0, 0, 0);
 
     // Side Camera (Orthographic)
     sideCamera = new THREE.OrthographicCamera(
         window.innerWidth / -5, window.innerWidth / 5,
         window.innerHeight / 5, window.innerHeight / -5,
-        1, 1000
+        0.1, 1000
     );
-    sideCamera.position.set(50, 0, 0);
-    sideCamera.lookAt(0, 0, 0);
+    sideCamera.position.set(100, 0, -90);
+    sideCamera.lookAt(0, 0, -90);
 
     // Perspective Camera
     perspectiveCamera = new THREE.PerspectiveCamera(70, aspect, 1, 1000);
@@ -451,11 +461,10 @@ function createFeet(){
 }
 
 function createTrailer(){
-    const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(60, 60, 160);
-    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal} );
-    //const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal,wireframe: true} );
-    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    const geotrailer= new THREE.BoxGeometry(60, 60, 160);
+    const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal} );
+    //const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal,wireframe: true} );
+    const cube = new THREE.Mesh(geotrailer, colortrailer);
     cube.position.set(0,40, -140);
 
     const connection = new THREE.Object3D();
@@ -464,17 +473,15 @@ function createTrailer(){
     const c = new THREE.Mesh(geoConnection, colorConnection);
     c.position.set(0,15, -55);
 
-
-    waist.add(cube);
-    waist.add(c);
-    scene.add(waist);
+    scene.add(trailer);
+    trailer.add(cube);
+    trailer.add(c);
 }
 
 function createTrailerCar(){
-    const waist = new THREE.Object3D();
-    const geoWaist= new THREE.BoxGeometry(60, 30, 80);
-    const colorWaist = new THREE.MeshBasicMaterial({ color: COLORS.red.light} );
-    const cube = new THREE.Mesh(geoWaist, colorWaist);
+    const geotrailer= new THREE.BoxGeometry(60, 30, 80);
+    const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.red.light} );
+    const cube = new THREE.Mesh(geotrailer, colortrailer);
     cube.position.set(0,-5, -180);
 
     const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
@@ -489,8 +496,8 @@ function createTrailerCar(){
     frontWheel.rotation.z = Math.PI / 2;
     frontWheel.position.set(30, -20, -180);
     
-    waist.add(backWheel);
-    waist.add(frontWheel);
+    trailer.add(backWheel);
+    trailer.add(frontWheel);
 
     const backWheel2 = new THREE.Mesh(geoWheel, colorWheel);
     backWheel2.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
@@ -501,12 +508,11 @@ function createTrailerCar(){
     frontWheel2.rotation.z = Math.PI / 2;
     frontWheel2.position.set(-30, -20, -180);
     
-    waist.add(backWheel2);
-    waist.add(frontWheel2);
+    trailer.add(backWheel2);
+    trailer.add(frontWheel2);
 
-
-    waist.add(cube);
-    scene.add(waist);
+    scene.add(trailer);
+    trailer.add(cube);
 }
 
 function createRobot(){
@@ -520,6 +526,11 @@ function createRobot(){
     createHeadplacer();
     createWaist();
     createLowerBody();
+}
+
+function createTrailerAll(){
+    createTrailer();
+    createTrailerCar();
 }
 
 //////////////////////
@@ -573,6 +584,39 @@ function update() {
             rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
             leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
             leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
+        }
+    }
+
+    // Perguntar ao stor se vai ser testado 3 teclas ao mesmo tempo
+    if(trailer){
+        const diagSpeed = movingSpeed / Math.sqrt(2);
+        if (movingUp && movingRight && !movingDown && !movingLeft) {
+            trailer.position.x -= diagSpeed;
+            trailer.position.z += diagSpeed;
+        }
+        else if (movingUp && movingLeft && !movingDown && !movingRight) {
+            trailer.position.x += diagSpeed;
+            trailer.position.z += diagSpeed;
+        }
+        else if (movingDown && movingRight && !movingUp && !movingLeft) {
+            trailer.position.x -= diagSpeed;
+            trailer.position.z -= diagSpeed;
+        }
+        else if (movingDown && movingLeft && !movingUp && !movingRight) {
+            trailer.position.x += diagSpeed;
+            trailer.position.z -= diagSpeed;
+        }
+        else if (movingUp && !movingRight && !movingLeft && !movingDown) {
+            trailer.position.z += movingSpeed;
+        }
+        else if (movingDown && !movingRight && !movingLeft && !movingUp) {
+            trailer.position.z -= movingSpeed;
+        }
+        else if (movingRight && !movingUp && !movingDown && !movingLeft) {
+            trailer.position.x -= movingSpeed;
+        }
+        else if (movingLeft && !movingUp && !movingDown && !movingRight) {
+            trailer.position.x += movingSpeed;
         }
     }
 
@@ -675,6 +719,18 @@ function onKeyDown(event) {
         case 'd':
             movingArmsOut = true;
             break;
+        case 'arrowup':
+            movingUp = true;
+            break;
+        case 'arrowdown':
+            movingDown = true;
+            break;
+        case 'arrowleft':
+            movingLeft = true;
+            break;
+        case 'arrowright':
+            movingRight = true;
+            break;
     }
 }
 
@@ -703,6 +759,18 @@ function onKeyUp(event) {
             break;
         case 'd':
             movingArmsOut = false;
+            break;
+        case 'arrowup':
+            movingUp = false;
+            break;
+        case 'arrowdown':
+            movingDown = false;
+            break;
+        case 'arrowleft':
+            movingLeft = false;
+            break;
+        case 'arrowright':
+            movingRight = false;
             break;
     }
 }
