@@ -660,6 +660,12 @@ function update() {
     }
 }
 
+function isTruckMode(){
+    return lowerBodyPivot.rotation.x == WAIST_ROTATION_MAX && feetPivot.rotation.x == 0 &&
+            headPivot.rotation.x == 0 && leftArm.position.z == 0 && rightArm.position.z == 0;
+    
+}
+
 function toggleWireframe(){
     if(isWireframe){
         trailer.traverse(function(child) {
