@@ -84,7 +84,7 @@ const trailerCoordinates = {
     xMin: -30,
     xMax: 30,
     zMin: -20,
-    zMax: - 180
+    zMax: -180
 }
 
 /////////////////////
@@ -526,30 +526,14 @@ function createTrailerCar(){
     trailer.add(cube);
 }
 
-function createTruckBox(){
-    const truckBox = new THREE.Object3D();
-    const truckGeometry = new THREE.BoxGeometry(
-        truckCoordinates.xMax - truckCoordinates.xMin,
-        100,
-        truckCoordinates.zMax - truckCoordinates.zMin
-    );
-    const truckMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-    const truckMesh = new THREE.Mesh(truckGeometry, truckMaterial);
-    truckMesh.position.set(0,20,-55);
-    scene.add(truckMesh);
+const trailerMaxPoint = {
+    x: 30,
+    z: -60
 }
 
-function createTrailerBox(){
-    const trailerBox = new THREE.Object3D();
-    const trailerGeometry = new THREE.BoxGeometry(
-        trailerCoordinates.xMax - trailerCoordinates.xMin,
-        100,
-        trailerCoordinates.zMax - trailerCoordinates.zMin
-    );
-    const trailerMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
-    const trailerMesh = new THREE.Mesh(trailerGeometry, trailerMaterial);
-    trailerMesh.position.set(0,20,-140);
-    scene.add(trailerMesh);
+const trailerMinPoint = {
+    x: -30,
+    z: -220
 }
 
 function createRobot(){
@@ -574,7 +558,23 @@ function createTrailerAll(){
 /* CHECK COLLISIONS */
 //////////////////////
 function checkCollisions() {
+    let newMaxX;
+    let newMaxZ;
+    let newMinX;
+    let newMinZ;
+    //if (!isTruckMode()){ return false;}
 
+    newMaxX = trailer.position.x + trailerCoordinates.xMax;
+    newMaxZ = trailer.position.z + trailerCoordinates.zMax;
+    newMinX = trailer.position.x + trailerCoordinates.xMin;
+    newMinZ = trailer.position.z + trailerCoordinates.zMin;
+
+    return (
+        newMaxX >= truckCoordinates.xMin &&
+        newMinX <= truckCoordinates.xMax &&
+        newMaxZ >= truckCoordinates.zMin &&
+        newMinZ <= truckCoordinates.zMax
+    );
 }
 
 ///////////////////////
@@ -657,6 +657,13 @@ function update() {
         else if (movingLeft && !movingUp && !movingDown && !movingRight) {
             trailer.position.x += movingSpeed;
         }
+    }
+
+    if (checkCollisions()) {
+        console.log("Collision detected!");
+    }
+    else {
+        console.log("No collision.");
     }
 }
 
@@ -872,7 +879,6 @@ function onKeyDown(event) {
             rotatingWaistRight = true;
             break;
         case 'q':
-            console.log(robotFeet.position);
             rotatingFeetUp = true;
             break;
         case 'a':
