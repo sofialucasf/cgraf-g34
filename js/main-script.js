@@ -74,10 +74,10 @@ const COLORS = {
 };
 
 const truckCoordinates = {
-    xMin: -30,
-    xMax: 30,
-    zMin: - 140,
-    zMax: 30
+    xMin: -60,
+    xMax: 60,
+    zMin: - 75,
+    zMax: 250
 }
 
 const trailerCoordinates = {
@@ -568,12 +568,33 @@ function checkCollisions() {
     newMaxZ = trailer.position.z + trailerCoordinates.zMax;
     newMinX = trailer.position.x + trailerCoordinates.xMin;
     newMinZ = trailer.position.z + trailerCoordinates.zMin;
+     
+
+    
+    //console.log(newMaxX,trailer.position.x,trailerCoordinates.xMax);
+    //console.log(newMaxZ,trailer.position.z,trailerCoordinates.zMax );
+    //console.log(newMinX,trailer.position.x,trailerCoordinates.xMax);
+    //console.log(newMinZ,trailer.position.z,trailerCoordinates.zMax );
+
+    console.log(truckCoordinates.xMin, '<=', trailer.position.x);
+    console.log(truckCoordinates.xMax, '>=', trailer.position.x);
+    console.log(truckCoordinates.zMin, '<=' ,trailer.position.z);
+    console.log(truckCoordinates.zMax, '>=' ,trailer.position.z);
+
+    // return (
+    //     rMin.x <= tMax.x &&
+    //     rMax.x >= tMin.x &&
+    //     rMin.y <= tMax.y &&
+    //     rMax.y >= tMin.y &&
+    //     rMin.z <= tMax.z &&
+    //     rMax.z >= tMin.z
+    //   );
 
     return (
-        newMaxX >= truckCoordinates.xMin &&
-        newMinX <= truckCoordinates.xMax &&
-        newMaxZ >= truckCoordinates.zMin &&
-        newMinZ <= truckCoordinates.zMax
+        truckCoordinates.xMin <= trailer.position.x &&
+        truckCoordinates.xMax >= trailer.position.x &&
+        truckCoordinates.zMin <= trailer.position.z &&
+        truckCoordinates.zMax >= trailer.position.z
     );
 }
 
