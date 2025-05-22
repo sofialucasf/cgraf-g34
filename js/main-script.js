@@ -76,15 +76,15 @@ const COLORS = {
 const truckCoordinates = {
     xMin: -30,
     xMax: 30,
-    zMin: - 140,
-    zMax: 30
+    zMin: -110,
+    zMax: 70
 }
 
 const trailerCoordinates = {
     xMin: -30,
     xMax: 30,
-    zMin: -20,
-    zMax: -180
+    zMin: -290,
+    zMax: -130
 }
 
 /////////////////////
@@ -97,11 +97,8 @@ function createScene() {
 
     // Axes Helper
     scene.add(new THREE.AxesHelper(10));
-
     createRobot();
-    createFeet();
     createTrailerAll();
-
 }
 
 /////////////////////
@@ -476,13 +473,13 @@ function createTrailer(){
     const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal} );
     //const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal,wireframe: true} );
     const cube = new THREE.Mesh(geotrailer, colortrailer);
-    cube.position.set(0,40, -140);
+    cube.position.set(0,40, -250);
 
     const connection = new THREE.Object3D();
     const geoConnection= new THREE.BoxGeometry(60, 10, 10);
     const colorConnection = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark} );
     const c = new THREE.Mesh(geoConnection, colorConnection);
-    c.position.set(0,15, -55);
+    c.position.set(0,15, -165);
 
     scene.add(trailer);
     trailer.add(cube);
@@ -493,31 +490,31 @@ function createTrailerCar(){
     const geotrailer= new THREE.BoxGeometry(60, 30, 80);
     const colortrailer = new THREE.MeshBasicMaterial({ color: COLORS.red.light} );
     const cube = new THREE.Mesh(geotrailer, colortrailer);
-    cube.position.set(0,-5, -180);
+    cube.position.set(0,-5, -290);
 
     const geoWheel = new THREE.CylinderGeometry(10, 10, 5, 32);
     const colorWheel = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
     
     const backWheel = new THREE.Mesh(geoWheel, colorWheel);
     backWheel.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    backWheel.position.set(30, -20, -205); 
+    backWheel.position.set(30, -20, -315); 
     
 
     const frontWheel = new THREE.Mesh(geoWheel, colorWheel);
     frontWheel.rotation.z = Math.PI / 2;
-    frontWheel.position.set(30, -20, -180);
+    frontWheel.position.set(30, -20, -290);
     
     trailer.add(backWheel);
     trailer.add(frontWheel);
 
     const backWheel2 = new THREE.Mesh(geoWheel, colorWheel);
     backWheel2.rotation.z = Math.PI / 2; // Rotate so the wheel lies flat
-    backWheel2.position.set(-30, -20, -205); 
+    backWheel2.position.set(-30, -20, -315); 
     
 
     const frontWheel2 = new THREE.Mesh(geoWheel, colorWheel);
     frontWheel2.rotation.z = Math.PI / 2;
-    frontWheel2.position.set(-30, -20, -180);
+    frontWheel2.position.set(-30, -20, -290);
     
     trailer.add(backWheel2);
     trailer.add(frontWheel2);
@@ -526,17 +523,9 @@ function createTrailerCar(){
     trailer.add(cube);
 }
 
-const trailerMaxPoint = {
-    x: 30,
-    z: -60
-}
-
-const trailerMinPoint = {
-    x: -30,
-    z: -220
-}
 
 function createRobot(){
+
     createRobotHead();
     createRightArm();
     createRightForearm();
@@ -562,13 +551,12 @@ function checkCollisions() {
     let newMaxZ;
     let newMinX;
     let newMinZ;
-    //if (!isTruckMode()){ return false;}
+    if (!isTruckMode()){ return false;}
 
     newMaxX = trailer.position.x + trailerCoordinates.xMax;
     newMaxZ = trailer.position.z + trailerCoordinates.zMax;
     newMinX = trailer.position.x + trailerCoordinates.xMin;
     newMinZ = trailer.position.z + trailerCoordinates.zMin;
-
     return (
         newMaxX >= truckCoordinates.xMin &&
         newMinX <= truckCoordinates.xMax &&
@@ -580,97 +568,106 @@ function checkCollisions() {
 ///////////////////////
 /* HANDLE COLLISIONS */
 ///////////////////////
-function handleCollisions() {}
+function handleCollisions() {
+    if (trailer.position.x > 0) {
+        trailer.position.x = Math.max(trailer.position.x - movingSpeed, 0);
+    }
+    if (trailer.position.x < 0) {
+        trailer.position.x = Math.min(trailer.position.x + movingSpeed, 0);
+    }
+    if (trailer.position.z > 110) {
+        trailer.position.z = Math.max(trailer.position.z - movingSpeed, 110);
+    }
+    if (trailer.position.z < 110) {
+        trailer.position.z = Math.min(trailer.position.z + movingSpeed, 110);
+    }
+}
 
 ////////////
 /* UPDATE */
 ////////////
 function update() {
     controls.update();
-    if (lowerBodyPivot) {
-        if (rotatingWaistLeft) {
-            lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + rotationSpeed, WAIST_ROTATION_MAX);
+    if (!checkCollisions()) {
+        if (lowerBodyPivot) {
+            if (rotatingWaistLeft) {
+                lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + rotationSpeed, WAIST_ROTATION_MAX);
+            }
+            if (rotatingWaistRight) {
+                lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
+            }
         }
-        if (rotatingWaistRight) {
-            lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
+        if (feetPivot) {
+            if (rotatingFeetUp) {
+                feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
+            }
+            if (rotatingFeetDown) {
+                feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
+            }
         }
-    }
-    if (feetPivot) {
-        if (rotatingFeetUp) {
-            feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
+        if (headPivot) {
+            if (rotatingHeadUp) {
+                headPivot.rotation.x = Math.max(headPivot.rotation.x - rotationSpeed, 0);
+            }
+            if (rotatingHeadDown) {
+                headPivot.rotation.x = Math.min(headPivot.rotation.x + rotationSpeed, Math.PI);
+            }
         }
-        if (rotatingFeetDown) {
-            feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
+        if(rightArm && leftArm){
+            if (movingArmsOut) {
+                rightArm.position.z = Math.min(rightArm.position.z + movingSpeed, 20);
+                rightArm.position.x = Math.max(rightArm.position.x - movingSpeed, -20);
+                leftArm.position.z = Math.min(leftArm.position.z + movingSpeed, 20);
+                leftArm.position.x = Math.min(leftArm.position.x + movingSpeed, 20);
+            }
+            if (movingArmsBack) {
+                rightArm.position.z = Math.max(rightArm.position.z - movingSpeed, 0);
+                rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
+                leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
+                leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
+            }
         }
-    }
-    if (headPivot) {
-        if (rotatingHeadUp) {
-            headPivot.rotation.x = Math.max(headPivot.rotation.x - rotationSpeed, 0);
-        }
-        if (rotatingHeadDown) {
-            headPivot.rotation.x = Math.min(headPivot.rotation.x + rotationSpeed, Math.PI);
-        }
-    }
-    if(rightArm && leftArm){
-        if (movingArmsOut) {
-            rightArm.position.z = Math.min(rightArm.position.z + movingSpeed, 20);
-            rightArm.position.x = Math.max(rightArm.position.x - movingSpeed, -20);
-            leftArm.position.z = Math.min(leftArm.position.z + movingSpeed, 20);
-            leftArm.position.x = Math.min(leftArm.position.x + movingSpeed, 20);
-        }
-        if (movingArmsBack) {
-            rightArm.position.z = Math.max(rightArm.position.z - movingSpeed, 0);
-            rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
-            leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
-            leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
-        }
-    }
 
-    // Perguntar ao stor se vai ser testado 3 teclas ao mesmo tempo
-    if(trailer){
-        const diagSpeed = movingSpeed / Math.sqrt(2);
-        if (movingUp && movingRight && !movingDown && !movingLeft) {
-            trailer.position.x -= diagSpeed;
-            trailer.position.z += diagSpeed;
-        }
-        else if (movingUp && movingLeft && !movingDown && !movingRight) {
-            trailer.position.x += diagSpeed;
-            trailer.position.z += diagSpeed;
-        }
-        else if (movingDown && movingRight && !movingUp && !movingLeft) {
-            trailer.position.x -= diagSpeed;
-            trailer.position.z -= diagSpeed;
-        }
-        else if (movingDown && movingLeft && !movingUp && !movingRight) {
-            trailer.position.x += diagSpeed;
-            trailer.position.z -= diagSpeed;
-        }
-        else if (movingUp && !movingRight && !movingLeft && !movingDown) {
-            trailer.position.z += movingSpeed;
-        }
-        else if (movingDown && !movingRight && !movingLeft && !movingUp) {
-            trailer.position.z -= movingSpeed;
-        }
-        else if (movingRight && !movingUp && !movingDown && !movingLeft) {
-            trailer.position.x -= movingSpeed;
-        }
-        else if (movingLeft && !movingUp && !movingDown && !movingRight) {
-            trailer.position.x += movingSpeed;
+        if(trailer){
+            const diagSpeed = movingSpeed / Math.sqrt(2);
+            if (movingUp && movingRight && !movingDown && !movingLeft) {
+                trailer.position.x -= diagSpeed;
+                trailer.position.z += diagSpeed;
+            }
+            else if (movingUp && movingLeft && !movingDown && !movingRight) {
+                trailer.position.x += diagSpeed;
+                trailer.position.z += diagSpeed;
+            }
+            else if (movingDown && movingRight && !movingUp && !movingLeft) {
+                trailer.position.x -= diagSpeed;
+                trailer.position.z -= diagSpeed;
+            }
+            else if (movingDown && movingLeft && !movingUp && !movingRight) {
+                trailer.position.x += diagSpeed;
+                trailer.position.z -= diagSpeed;
+            }
+            else if (movingUp && !movingRight && !movingLeft && !movingDown) {
+                trailer.position.z += movingSpeed;
+            }
+            else if (movingDown && !movingRight && !movingLeft && !movingUp) {
+                trailer.position.z -= movingSpeed;
+            }
+            else if (movingRight && !movingUp && !movingDown && !movingLeft) {
+                trailer.position.x -= movingSpeed;
+            }
+            else if (movingLeft && !movingUp && !movingDown && !movingRight) {
+                trailer.position.x += movingSpeed;
+            }
         }
     }
-
     if (checkCollisions()) {
-        console.log("Collision detected!");
-    }
-    else {
-        console.log("No collision.");
+        handleCollisions();
     }
 }
 
 function isTruckMode(){
     return lowerBodyPivot.rotation.x == WAIST_ROTATION_MAX && feetPivot.rotation.x == 0 &&
             headPivot.rotation.x == 0 && leftArm.position.z == 0 && rightArm.position.z == 0;
-    
 }
 
 function toggleWireframe(){
