@@ -558,10 +558,10 @@ function checkCollisions() {
     newMinX = trailer.position.x + trailerCoordinates.xMin;
     newMinZ = trailer.position.z + trailerCoordinates.zMin;
     return (
-        newMaxX >= truckCoordinates.xMin &&
-        newMinX <= truckCoordinates.xMax &&
-        newMaxZ >= truckCoordinates.zMin &&
-        newMinZ <= truckCoordinates.zMax
+        truckCoordinates.xMin <= trailer.position.x &&
+        truckCoordinates.xMax >= trailer.position.x &&
+        truckCoordinates.zMin <= trailer.position.z &&
+        truckCoordinates.zMax >= trailer.position.z
     );
 }
 
