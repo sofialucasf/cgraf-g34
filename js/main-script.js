@@ -33,7 +33,7 @@ let movingRight = false;
 let movingLeft = false;
 
 const rotationSpeed = 0.03;
-const movingSpeed = 0.2;
+const movingSpeed = 0.5;
 const WAIST_ROTATION_MIN = -Math.PI / 2;
 const WAIST_ROTATION_MAX = 0;
 const robotHead = new THREE.Group();  // grupo para o movimento da cabeça
@@ -73,9 +73,24 @@ const COLORS = {
     }
 };
 
+const truckCoordinates = {
+    xMin: -30,
+    xMax: 30,
+    zMin: - 140,
+    zMax: 30
+}
+
+const trailerCoordinates = {
+    xMin: -30,
+    xMax: 30,
+    zMin: -20,
+    zMax: - 180
+}
+
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
+
 function createScene() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xb0fcff);
@@ -130,11 +145,6 @@ function createCameras() {
     // Start with Perspective
     activeCamera = perspectiveCamera;
 }
-
-/////////////////////
-/* CREATE LIGHT(S) */
-/////////////////////
-
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -280,8 +290,6 @@ function createAbdomen(){
     cube.add(decor);
     abdomen.add(cube);
     restRobot.add(abdomen);
-
-    
 }
 
 function createChest(){
@@ -461,7 +469,6 @@ function createFeet(){
     robotFeet.position.set(0, 15, 130);
     feetPivot.add(robotFeet);
     lowerBody.add(feetPivot);
-
 }
 
 function createTrailer(){
@@ -519,6 +526,32 @@ function createTrailerCar(){
     trailer.add(cube);
 }
 
+function createTruckBox(){
+    const truckBox = new THREE.Object3D();
+    const truckGeometry = new THREE.BoxGeometry(
+        truckCoordinates.xMax - truckCoordinates.xMin,
+        100,
+        truckCoordinates.zMax - truckCoordinates.zMin
+    );
+    const truckMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const truckMesh = new THREE.Mesh(truckGeometry, truckMaterial);
+    truckMesh.position.set(0,20,-55);
+    scene.add(truckMesh);
+}
+
+function createTrailerBox(){
+    const trailerBox = new THREE.Object3D();
+    const trailerGeometry = new THREE.BoxGeometry(
+        trailerCoordinates.xMax - trailerCoordinates.xMin,
+        100,
+        trailerCoordinates.zMax - trailerCoordinates.zMin
+    );
+    const trailerMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
+    const trailerMesh = new THREE.Mesh(trailerGeometry, trailerMaterial);
+    trailerMesh.position.set(0,20,-140);
+    scene.add(trailerMesh);
+}
+
 function createRobot(){
     createRobotHead();
     createRightArm();
@@ -540,7 +573,9 @@ function createTrailerAll(){
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
-function checkCollisions() {}
+function checkCollisions() {
+
+}
 
 ///////////////////////
 /* HANDLE COLLISIONS */
@@ -623,7 +658,6 @@ function update() {
             trailer.position.x += movingSpeed;
         }
     }
-
 }
 
 function toggleWireframe(){
