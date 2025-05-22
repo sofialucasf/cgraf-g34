@@ -109,12 +109,12 @@ function createCameras() {
 
     // Top Camera (Orthographic)
     topCamera = new THREE.OrthographicCamera(
-        window.innerWidth / -5, window.innerWidth / 5,
-        window.innerHeight / 5, window.innerHeight / -5,
+        window.innerWidth / -3, window.innerWidth / 3,
+        window.innerHeight / 3, window.innerHeight / -3,
         0.1, 1000
     );
-    topCamera.position.set(0, 100, -90);
-    topCamera.lookAt(0, 0, -90);
+    topCamera.position.set(0, 150, -150);
+    topCamera.lookAt(0, 0, -150);
 
     // Front Camera (Orthographic)
     frontCamera = new THREE.OrthographicCamera(
@@ -558,10 +558,10 @@ function checkCollisions() {
     newMinX = trailer.position.x + trailerCoordinates.xMin;
     newMinZ = trailer.position.z + trailerCoordinates.zMin;
     return (
-        truckCoordinates.xMin <= trailer.position.x &&
-        truckCoordinates.xMax >= trailer.position.x &&
-        truckCoordinates.zMin <= trailer.position.z &&
-        truckCoordinates.zMax >= trailer.position.z
+        newMaxX >= truckCoordinates.xMin &&
+        newMinX <= truckCoordinates.xMax &&
+        newMaxZ >= truckCoordinates.zMin &&
+        newMinZ <= truckCoordinates.zMax
     );
 }
 
