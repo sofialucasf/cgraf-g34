@@ -26,6 +26,8 @@ let rotatingHeadDown = false;
 let movingArmsOut = false;
 let movingArmsBack = false;
 let isWireframe = false;
+let isTrailerInColision = false;
+let isTrailerConnecting = false;
 
 let movingUp = false;
 let movingDown = false;
@@ -569,6 +571,7 @@ function handleCollisions() {
     if (trailer.position.z < 110) {
         trailer.position.z = Math.min(trailer.position.z + movingSpeed, 110);
     }
+
 }
 
 ////////////
@@ -577,80 +580,100 @@ function handleCollisions() {
 function update() {
     controls.update();
     
-    if (lowerBodyPivot) {
-        if (rotatingWaistLeft) {
-            lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + rotationSpeed, WAIST_ROTATION_MAX);
+    if(!isTrailerConnecting){
+
+        if (lowerBodyPivot) {
+            if (rotatingWaistLeft) {
+                lowerBodyPivot.rotation.x = Math.min(lowerBodyPivot.rotation.x + rotationSpeed, WAIST_ROTATION_MAX);
+            }
+            if (rotatingWaistRight) {
+                lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
+            }
         }
-        if (rotatingWaistRight) {
-            lowerBodyPivot.rotation.x = Math.max(lowerBodyPivot.rotation.x - rotationSpeed, WAIST_ROTATION_MIN);
+        if (feetPivot) {
+            if (rotatingFeetUp) {
+                feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
+            }
+            if (rotatingFeetDown) {
+                feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
+            }
         }
-    }
-    if (feetPivot) {
-        if (rotatingFeetUp) {
-            feetPivot.rotation.x = Math.min(feetPivot.rotation.x + rotationSpeed, 0);
+        if (headPivot) {
+            if (rotatingHeadUp) {
+                headPivot.rotation.x = Math.max(headPivot.rotation.x - rotationSpeed, 0);
+            }
+            if (rotatingHeadDown) {
+                headPivot.rotation.x = Math.min(headPivot.rotation.x + rotationSpeed, Math.PI);
+            }
         }
-        if (rotatingFeetDown) {
-            feetPivot.rotation.x = Math.max(feetPivot.rotation.x - rotationSpeed, -Math.PI);
+        if(rightArm && leftArm){
+            if (movingArmsOut) {
+                rightArm.position.z = Math.min(rightArm.position.z + movingSpeed, 20);
+                rightArm.position.x = Math.max(rightArm.position.x - movingSpeed, -20);
+                leftArm.position.z = Math.min(leftArm.position.z + movingSpeed, 20);
+                leftArm.position.x = Math.min(leftArm.position.x + movingSpeed, 20);
+            }
+            if (movingArmsBack) {
+                rightArm.position.z = Math.max(rightArm.position.z - movingSpeed, 0);
+                rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
+                leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
+                leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
+            }
         }
-    }
-    if (headPivot) {
-        if (rotatingHeadUp) {
-            headPivot.rotation.x = Math.max(headPivot.rotation.x - rotationSpeed, 0);
+        
+        if(trailer){
+            const diagSpeed = movingSpeed / Math.sqrt(2);
+            if (movingUp && movingRight && !movingDown && !movingLeft) {
+                trailer.position.x -= diagSpeed;
+                trailer.position.z += diagSpeed;
+            }
+            else if (movingUp && movingLeft && !movingDown && !movingRight) {
+                trailer.position.x += diagSpeed;
+                trailer.position.z += diagSpeed;
+            }
+            else if (movingDown && movingRight && !movingUp && !movingLeft) {
+                trailer.position.x -= diagSpeed;
+                trailer.position.z -= diagSpeed;
+            }
+            else if (movingDown && movingLeft && !movingUp && !movingRight) {
+                trailer.position.x += diagSpeed;
+                trailer.position.z -= diagSpeed;
+            }
+            else if (movingUp && !movingRight && !movingLeft && !movingDown) {
+                trailer.position.z += movingSpeed;
+            }
+            else if (movingDown && !movingRight && !movingLeft && !movingUp) {
+                trailer.position.z -= movingSpeed;
+            }
+            else if (movingRight && !movingUp && !movingDown && !movingLeft) {
+                trailer.position.x -= movingSpeed;
+            }
+            else if (movingLeft && !movingUp && !movingDown && !movingRight) {
+                trailer.position.x += movingSpeed;
+            }
         }
-        if (rotatingHeadDown) {
-            headPivot.rotation.x = Math.min(headPivot.rotation.x + rotationSpeed, Math.PI);
-        }
-    }
-    if(rightArm && leftArm){
-        if (movingArmsOut) {
-            rightArm.position.z = Math.min(rightArm.position.z + movingSpeed, 20);
-            rightArm.position.x = Math.max(rightArm.position.x - movingSpeed, -20);
-            leftArm.position.z = Math.min(leftArm.position.z + movingSpeed, 20);
-            leftArm.position.x = Math.min(leftArm.position.x + movingSpeed, 20);
-        }
-        if (movingArmsBack) {
-            rightArm.position.z = Math.max(rightArm.position.z - movingSpeed, 0);
-            rightArm.position.x = Math.min(rightArm.position.x + movingSpeed, 0);
-            leftArm.position.z = Math.max(leftArm.position.z - movingSpeed, 0);
-            leftArm.position.x = Math.max(leftArm.position.x - movingSpeed, 0);
-        }
+        
     }
 
-    if(trailer){
-        const diagSpeed = movingSpeed / Math.sqrt(2);
-        if (movingUp && movingRight && !movingDown && !movingLeft) {
-            trailer.position.x -= diagSpeed;
-            trailer.position.z += diagSpeed;
-        }
-        else if (movingUp && movingLeft && !movingDown && !movingRight) {
-            trailer.position.x += diagSpeed;
-            trailer.position.z += diagSpeed;
-        }
-        else if (movingDown && movingRight && !movingUp && !movingLeft) {
-            trailer.position.x -= diagSpeed;
-            trailer.position.z -= diagSpeed;
-        }
-        else if (movingDown && movingLeft && !movingUp && !movingRight) {
-            trailer.position.x += diagSpeed;
-            trailer.position.z -= diagSpeed;
-        }
-        else if (movingUp && !movingRight && !movingLeft && !movingDown) {
-            trailer.position.z += movingSpeed;
-        }
-        else if (movingDown && !movingRight && !movingLeft && !movingUp) {
-            trailer.position.z -= movingSpeed;
-        }
-        else if (movingRight && !movingUp && !movingDown && !movingLeft) {
-            trailer.position.x -= movingSpeed;
-        }
-        else if (movingLeft && !movingUp && !movingDown && !movingRight) {
-            trailer.position.x += movingSpeed;
-        }
+    if (checkCollisions() && !isTrailerConnecting && !isTrailerInColision) {
+        isTrailerConnecting = true;
     }
     
-    if (checkCollisions()) {
+    else if (trailer.position.x == 0 && trailer.position.z == 110) { // trailer está na posição de reposo
+        isTrailerInColision = true;
+        isTrailerConnecting = false;
+    }
+            
+    else if (!checkCollisions() && isTrailerInColision && !isTrailerConnecting) { 
+        isTrailerInColision = false;
+    }
+
+    else if (isTrailerConnecting) {
         handleCollisions();
     }
+
+
+
 }
 
 function isTruckMode(){
@@ -668,6 +691,8 @@ function toggleWireframe() {
     });
     isWireframe = !isWireframe;
 }
+
+
 
 ////////////////////////////////
 /* INITIALIZE ANIMATION CYCLE */
