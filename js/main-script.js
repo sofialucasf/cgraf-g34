@@ -8,6 +8,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 let scene, renderer;
 let perspectiveCamera, controls;
+const house = new THREE.Group();
 
 const COLORS = {
     blue: {
@@ -38,31 +39,16 @@ const COLORS = {
     }
 };
 
-let wheelMaterial = new THREE.MeshBasicMaterial({ color: COLORS.black.tire });
-let eyeMaterial = new THREE.MeshBasicMaterial({ color: COLORS.blue.light });
-let darkRedMaterial = new THREE.MeshBasicMaterial({ color: COLORS.red.dark });
-let lightRedMaterial = new THREE.MeshBasicMaterial({ color: COLORS.red.light });
-let redMaterial = new THREE.MeshBasicMaterial({ color: COLORS.red.normal });
-let darkBlueMaterial = new THREE.MeshBasicMaterial({ color: COLORS.blue.dark });
-let yellowMaterial = new THREE.MeshBasicMaterial({ color: COLORS.yellow.normal });
-let lightYellowMaterial = new THREE.MeshBasicMaterial({ color: COLORS.yellow.light });
-let lightGreyMaterial = new THREE.MeshBasicMaterial({ color: COLORS.grey.light });
-let greyMaterial = new THREE.MeshBasicMaterial({ color: COLORS.grey.normal });
-let darkGreyMaterial = new THREE.MeshBasicMaterial({ color: COLORS.grey.dark });
+// Materials House
+const wallMat = new THREE.MeshBasicMaterial({ color: 0xf5f5dc }); // beige
+const roofMat = new THREE.MeshBasicMaterial({ color: 0xffa500 }); // orange
+const doorMat = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // blue
+const windowMat = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // blue
 
-let materialList = [
-    wheelMaterial,
-    eyeMaterial,
-    darkRedMaterial,
-    lightRedMaterial,
-    redMaterial,
-    darkBlueMaterial,
-    yellowMaterial,
-    lightYellowMaterial,
-    lightGreyMaterial,
-    greyMaterial,
-    darkGreyMaterial,
-];
+
+
+
+
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -140,6 +126,55 @@ function createGlobalLight() {
     scene.add(globalLight);
 };
 
+function createWallFace(p1, p2, p3, p4, material) {
+    const geom = new THREE.BufferGeometry();
+    const verts = new Float32Array([
+      ...p1, ...p2, ...p3,
+      ...p1, ...p3, ...p4,
+    ]);
+    geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+    return new THREE.Mesh(geom, material);
+  }
+  
+
+  
+  function createHouse(){
+
+    // House
+    house.add(createWallFace( [-2, 0 ,2], [2, 0 ,2], [2, 2 ,2], [-2, 2 ,2], wallMat)); // Front
+    house.add(createWallFace( [2, 0 ,2], [2, 0 ,-2], [2, 2 ,-2], [2, 2 ,2], wallMat)); // Right
+    house.add(createWallFace( [2, 0 ,-2], [-2, 0 ,-2], [-2, 2 ,-2], [2, 2 ,-2], wallMat)); // Back
+    house.add(createWallFace( [-2, 0 ,-2], [-2, 0 ,2], [-2, 2 ,2], [-2, 2 ,-2], wallMat)); // Left
+    
+    // Roof
+    house.add(createWallFace( [-2, 2 ,2] , [2, 2 ,2] , [0, 3 ,2] , [-2, 2 ,2] , roofMat));   // Front 
+    house.add(createWallFace( [2, 2 ,2] , [2, 2 ,-2] , [0, 3 ,-2] , [0, 3 ,2] , roofMat));    // Right 
+    house.add(createWallFace( [2, 2 ,-2], [-2, 2 ,-2] , [0, 3 ,-2] , [2, 2 ,-2] , roofMat)); // Back 
+    house.add(createWallFace( [-2, 2 ,-2] , [-2, 2 ,2] , [0, 3 ,2] , [0, 3 ,-2], roofMat));  // Left 
+
+    // Door
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.5), doorMat);
+    door.position.set(0, 0.75, 2.01);
+    house.add(door);
+
+    // Windows
+    const windowGeom = new THREE.PlaneGeometry(0.8, 0.8);
+    
+    const winL = new THREE.Mesh(windowGeom, windowMat);
+    winL.position.set(-2.01, 1.3, 0);
+    winL.rotation.y = Math.PI / 2;
+    house.add(winL);
+    
+    const winR = new THREE.Mesh(windowGeom, windowMat);
+    winR.position.set(2.01, 1.3, 0);
+    winR.rotation.y = -Math.PI / 2;
+    house.add(winR);
+
+    scene.add(house);
+    
+  }
+  
+
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -171,6 +206,7 @@ function init() {
     createSkyDome();
     createMoon();
     createGlobalLight();
+    createHouse();
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
