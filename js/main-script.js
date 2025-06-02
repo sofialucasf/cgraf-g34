@@ -11,6 +11,18 @@ let perspectiveCamera, controls;
 const house = new THREE.Group();
 const ovni = new THREE.Group();
 
+// Assuming house is a THREE.Mesh
+house.updateMatrixWorld(); // Ensure world transforms are up to date
+
+// Get bounding box in local space
+const box = new THREE.Box3().setFromObject(house);
+
+// Get center and size
+const center = new THREE.Vector3();
+const size = new THREE.Vector3();
+box.getCenter(center);
+box.getSize(size);
+
 
 const COLORS = {
     blue: {
@@ -388,14 +400,15 @@ function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
 }
 
 function createTrees(num) {
-    const size = 512;
+    const size = 360;
 
     for(let i = 0; i < num; i++){
         const width = Math.floor(Math.random() * (size + 1)) - size/2;
         const length = Math.floor(Math.random() * (size + 1)) - size/2;
         //const height = heightMap.get(width, length);
         const rot = Math.floor(Math.random() * 360);
-        const scalar = Math.floor(Math.random() * 12) +5;      
+        const scalar = Math.floor(Math.random() * 10) +5;
+             
         createTree(width,0,length,rot,scalar); 
     }
     
@@ -434,7 +447,7 @@ function init() {
     createGlobalLight();
     createHouse();
     createOvni();    
-    createTrees(6000);
+    createTrees(25);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
