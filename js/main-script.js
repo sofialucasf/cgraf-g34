@@ -150,7 +150,7 @@ function createCameras() {
 function generateFloralTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 512;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');  
 
     // Fundo verde-claro
     ctx.fillStyle = '#ccffcc';
@@ -373,7 +373,7 @@ function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
     for (let i = 0; i < numElipsoids; i++) {
       const leafsGeo = new THREE.SphereGeometry(1.5, 16, 16);
       const leafs = new THREE.Mesh(leafsGeo, leafsMatLambert);
-      leafs.scale.set(1.2, 0.8, 1.2); // Elipsoide
+      leafs.scale.set(1.2, 0.8, 1.2);
       leafs.position.set((Math.random() - 0.5) * 1.5,
                         4.5 + i* 0.5,
                         (Math.random() - 0.5) * 1.5);
@@ -385,7 +385,19 @@ function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
     scene.add(tree);
 
     return tree;
-  }
+}
+
+function createTrees(num) {
+    //const size = 512;
+    for(let i = 0; i < num; i++){
+        const width = Math.floor(Math.random() * 513) - 256;
+        const length = Math.floor(Math.random() * 513) - 256;
+        //const height = heightMap.get(width, length);            
+        createTree(width,0,length,2,10); 
+    }
+    
+   
+}
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -418,8 +430,8 @@ function init() {
     createMoon();
     createGlobalLight();
     createHouse();
-    createOvni();
-    createTree();
+    createOvni();    
+    createTrees(600);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
