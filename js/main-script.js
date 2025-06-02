@@ -11,6 +11,7 @@ let perspectiveCamera, controls;
 const house = new THREE.Group();
 const ovni = new THREE.Group();
 
+
 const COLORS = {
     blue: {
       light: 'lightblue',
@@ -81,6 +82,7 @@ let skyToonMaterial = new THREE.MeshToonMaterial({
     side: THREE.BackSide 
 });
 
+
 // LambertMaterial
 const wallMatLambert = new THREE.MeshLambertMaterial({ color: 0xf5f5dc });
 const wallMatDetailLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff });
@@ -91,6 +93,8 @@ const ovniBodyMatLambert = new THREE.MeshLambertMaterial({ color: 0x909090 });
 const ovniCylinderMatLambert = new THREE.MeshLambertMaterial({ color: 0x707070 });
 const ovniGlassMatLambert = new THREE.MeshLambertMaterial({ color: 0x70c6ff });
 const ovniLightsMatLambert = new THREE.MeshLambertMaterial({ color: 0xfff838 });
+const trunkMatLambert = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
+const leafsMatLambert = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
 // PhongMaterial
 const wallMatPhong = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
@@ -102,6 +106,8 @@ const ovniBodyMatPhong = new THREE.MeshPhongMaterial({ color: 0x909090 });
 const ovniCylinderMatPhong = new THREE.MeshPhongMaterial({ color: 0x707070 });
 const ovniGlassMatPhong = new THREE.MeshPhongMaterial({ color: 0x70c6ff });
 const ovniLightsMatPhong = new THREE.MeshPhongMaterial({ color: 0xfff838 });
+const trunkMatPhong = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
+const leafsMatPhong = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
 //ToonMaterial
 const wallMatToon = new THREE.MeshToonMaterial({ color: 0xf5f5dc });
@@ -113,6 +119,8 @@ const ovniBodyMatToon = new THREE.MeshToonMaterial({ color: 0x909090 });
 const ovniCylinderMatToon = new THREE.MeshToonMaterial({ color: 0x707070 });
 const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
 const ovniLightsMatToon = new THREE.MeshToonMaterial({ color: 0xfff838 });
+const trunkMatToon = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
+const leafsMatToon = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -343,6 +351,42 @@ function createOvni(){
     
 }
 
+function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
+    const tree = new THREE.Group();
+
+    // Tronco grande
+    const trunkGeo = new THREE.CylinderGeometry(0.5, 0.6, 5, 16);
+    const trunk = new THREE.Mesh(trunkGeo, trunkMatLambert);
+    trunk.rotation.z = THREE.MathUtils.degToRad(10);
+    trunk.position.y = 2.0;
+    tree.add(trunk);
+
+    // Ramo pequeno
+    const branchGeo = new THREE.CylinderGeometry(0.2, 0.25, 2.5, 12);
+    const branch = new THREE.Mesh(branchGeo, trunkMatLambert);
+    branch.rotation.z = THREE.MathUtils.degToRad(-30);
+    branch.position.set(.8, 4, 0);
+    tree.add(branch);
+
+    // Copa 2 ou 3 elipsoides 
+    const numElipsoids = Math.floor(Math.random() * 3) +1; 
+    for (let i = 0; i < numElipsoids; i++) {
+      const leafsGeo = new THREE.SphereGeometry(1.5, 16, 16);
+      const leafs = new THREE.Mesh(leafsGeo, leafsMatLambert);
+      leafs.scale.set(1.2, 0.8, 1.2); // Elipsoide
+      leafs.position.set((Math.random() - 0.5) * 1.5,
+                        4.5 + i* 0.5,
+                        (Math.random() - 0.5) * 1.5);
+      tree.add(leafs);
+    }
+    tree.position.set(x,y,z);
+    tree.scale.setScalar(scalar);
+    tree.rotation.y =rot;
+    scene.add(tree);
+
+    return tree;
+  }
+
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
@@ -375,6 +419,7 @@ function init() {
     createGlobalLight();
     createHouse();
     createOvni();
+    createTree();
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
