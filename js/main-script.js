@@ -388,12 +388,15 @@ function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
 }
 
 function createTrees(num) {
-    //const size = 512;
+    const size = 512;
+
     for(let i = 0; i < num; i++){
-        const width = Math.floor(Math.random() * 513) - 256;
-        const length = Math.floor(Math.random() * 513) - 256;
-        //const height = heightMap.get(width, length);            
-        createTree(width,0,length,2,10); 
+        const width = Math.floor(Math.random() * (size + 1)) - size/2;
+        const length = Math.floor(Math.random() * (size + 1)) - size/2;
+        //const height = heightMap.get(width, length);
+        const rot = Math.floor(Math.random() * 360);
+        const scalar = Math.floor(Math.random() * 12) +5;      
+        createTree(width,0,length,rot,scalar); 
     }
     
    
@@ -431,7 +434,7 @@ function init() {
     createGlobalLight();
     createHouse();
     createOvni();    
-    createTrees(600);
+    createTrees(6000);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
