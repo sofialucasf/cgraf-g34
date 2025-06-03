@@ -138,6 +138,31 @@ function createScene() {
     scene.add(new THREE.AxesHelper(10));
 }
 
+function processTexture(texture){
+    const image = texture.image;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height =image.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image,0,0);
+
+    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const data = imageData.data;
+
+    for(let y = 0; y < canvas.height; y++){
+         for(let x = 0; x < canvas.width; x++){
+             const i =(y * canvas.width + x)*4;
+
+             const r = data[i];
+             const g = data[i + 1];
+             const b = data[i + 2];
+             const a = data[i + 3];
+         }
+    }
+}
+
 /////////////////////
 /* CREATE CAMERA(S)  */
 /////////////////////
@@ -239,7 +264,7 @@ function createGlobalLight() {
     globalLight.castShadow = true;
     scene.add(globalLight);
 };
-
+ 
 function createWallFace(p1, p2, p3, p4, material) {
     const geom = new THREE.BufferGeometry();
     const verts = new Float32Array([
@@ -408,9 +433,10 @@ function createTrees(num) {
     for(let i = 0; i < num; i++){
         const width = Math.floor(Math.random() * (size + 1)) - size/2;
         const length = Math.floor(Math.random() * (size + 1)) - size/2;
-        //const height = heightMap.get(width, length);
+        //const height = heightMap;
         const rot = Math.floor(Math.random() * 360);
         const scalar = Math.floor(Math.random() * 10) +5;
+       
              
         createTree(width,0,length,rot,scalar); 
     }
@@ -450,8 +476,9 @@ function init() {
     createMoon();
     createGlobalLight();
     createHouse();
-    createOvni();    
-    createTrees(25);
+    createOvni();  
+    processTexture(heightMap);  //nao sei se isto e assim
+    createTrees(20);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
