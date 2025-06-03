@@ -8,21 +8,13 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 let scene, renderer;
 let perspectiveCamera, controls;
+
+const clock = new THREE.Clock();
+
 const house = new THREE.Group();
 const ovni = new THREE.Group();
 
-// Assuming house is a THREE.Mesh
-house.updateMatrixWorld(); // Ensure world transforms are up to date
-
-// Get bounding box in local space
-const box = new THREE.Box3().setFromObject(house);
-
-// Get center and size
-const center = new THREE.Vector3();
-const size = new THREE.Vector3();
-box.getCenter(center);
-box.getSize(size);
-
+const ovniRotationSpeed = 1;
 
 const COLORS = {
     blue: {
@@ -46,10 +38,10 @@ const COLORS = {
       dark: 'goldenrod'
     },
     black: {
-      tire: '#111111',   // Very dark gray, good for tires
-      dark: '#222222',   // Slightly lighter
-      normal: '#333333', // Still dark but visibly lighter
-      light: '#555555'   // Charcoal-like
+      tire: '#111111',
+      dark: '#222222',
+      normal: '#333333',
+      light: '#555555'
     }
 };
 
@@ -104,7 +96,7 @@ const windowMatLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff });
 const ovniBodyMatLambert = new THREE.MeshLambertMaterial({ color: 0x909090 });
 const ovniCylinderMatLambert = new THREE.MeshLambertMaterial({ color: 0x707070 });
 const ovniGlassMatLambert = new THREE.MeshLambertMaterial({ color: 0x70c6ff });
-const ovniLightsMatLambert = new THREE.MeshLambertMaterial({ color: 0xfff838 });
+const ovniLightsMatLambert = new THREE.MeshLambertMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
 const trunkMatLambert = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatLambert = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
@@ -117,7 +109,7 @@ const windowMatPhong = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 const ovniBodyMatPhong = new THREE.MeshPhongMaterial({ color: 0x909090 });
 const ovniCylinderMatPhong = new THREE.MeshPhongMaterial({ color: 0x707070 });
 const ovniGlassMatPhong = new THREE.MeshPhongMaterial({ color: 0x70c6ff });
-const ovniLightsMatPhong = new THREE.MeshPhongMaterial({ color: 0xfff838 });
+const ovniLightsMatPhong = new THREE.MeshPhongMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
 const trunkMatPhong = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatPhong = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
@@ -130,7 +122,7 @@ const windowMatToon = new THREE.MeshToonMaterial({ color: 0x0000ff });
 const ovniBodyMatToon = new THREE.MeshToonMaterial({ color: 0x909090 });
 const ovniCylinderMatToon = new THREE.MeshToonMaterial({ color: 0x707070 });
 const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
-const ovniLightsMatToon = new THREE.MeshToonMaterial({ color: 0xfff838 });
+const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
 const trunkMatToon = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatToon = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
@@ -241,7 +233,7 @@ function createMoon(){
 }
 
 function createGlobalLight() {
-    const globalLight = new THREE.DirectionalLight(0xffffff, 3);
+    const globalLight = new THREE.DirectionalLight('white', 2);
     globalLight.position.set(100, 150, 100);
     globalLight.lookAt(new THREE.Vector3(0, 0, 0));
     globalLight.castShadow = true;
@@ -313,7 +305,6 @@ function createWallFace(p1, p2, p3, p4, material) {
     scene.add(house);
 }
 
-// Adds a small sphere at a given angle around the bottom of the ovni
 function addBottomLight(angle) {
     const radius = 30; 
     const lightDistance = radius * 0.9; 
@@ -325,8 +316,9 @@ function addBottomLight(angle) {
     const light = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), ovniLightsMatLambert);
     light.position.set(x, y, z);
 
-    const pointLight = new THREE.PointLight(0xfff838, 2, 30);
+    const pointLight = new THREE.PointLight(COLORS.yellow.light, 20, 100);
     pointLight.position.set(x, y, z);
+    pointLight.castShadow = true;
     ovni.add(pointLight);
 
     ovni.add(light);
@@ -344,11 +336,6 @@ function createOvni(){
     ovniCylinder.position.set(0, -6, 0);
     ovni.add(ovniCylinder);
 
-    const spotLight = new THREE.SpotLight('white', 10, 30);
-    spotLight.rotation.x = -Math.PI / 2;
-    spotLight.position.set(0, -3, 0);
-    ovni.add(spotLight);
-
     addBottomLight(0);
     addBottomLight(Math.PI / 4);
     addBottomLight(Math.PI / 2);
@@ -358,12 +345,27 @@ function createOvni(){
     addBottomLight(3 * Math.PI / 2);
     addBottomLight(7 * Math.PI / 4);
 
-    ovni.position.set(100, 100, -100);
+    const spotLight = new THREE.SpotLight('blue', 2, 150, Math.PI / 6, 0.4, 2);
+    spotLight.castShadow = true;
+
+    spotLight.position.set(0, -10, 0);
+    ovni.add(spotLight);
+
+
+    const targetObject = new THREE.Object3D();
+    targetObject.position.set(0, -80, 0);
+    ovni.add(targetObject); 
+
+    spotLight.target = targetObject;
+
+    ovni.position.set(0, 150, 0);
     scene.add(ovni);
-    
+
+    const helper = new THREE.SpotLightHelper(spotLight, 5);
+    scene.add(helper);
 }
 
-function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
+function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     const tree = new THREE.Group();
 
     // Tronco grande
@@ -385,6 +387,7 @@ function createTree(x = 0,y = 0,z = 0,rot = 0,scalar = 1) {
     for (let i = 0; i < numElipsoids; i++) {
       const leafsGeo = new THREE.SphereGeometry(1.5, 16, 16);
       const leafs = new THREE.Mesh(leafsGeo, leafsMatLambert);
+      leafs.receiveShadow = true;
       leafs.scale.set(1.2, 0.8, 1.2);
       leafs.position.set((Math.random() - 0.5) * 1.5,
                         4.5 + i* 0.5,
@@ -429,6 +432,7 @@ function createTrees(num) {
 ////////////
 function update() {
     controls.update();
+    ovni.rotation.y += ovniRotationSpeed * clock.getDelta(); 
 }
 
 ////////////////////////////////
