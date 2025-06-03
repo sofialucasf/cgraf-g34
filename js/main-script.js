@@ -18,6 +18,7 @@ const ovniRotationSpeed = 1;
 const ovniMovingSpeed = 100;
 const diagSpeed = ovniMovingSpeed / Math.sqrt(2);
 
+let bufferZone = 20;
 let ovniMovingUp = 0;
 let ovniMovingDown = 0;
 let ovniMovingLeft = 0;
@@ -132,6 +133,13 @@ const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
 const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
 const trunkMatToon = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatToon = new THREE.MeshPhongMaterial({ color: 0x006400 });
+
+const houseCoords = {
+    xMin: -127 - bufferZone, 
+    xMax: -62 + bufferZone,  
+    zMin: -85 - bufferZone,  
+    zMax: -12 + bufferZone   
+  };
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -431,6 +439,13 @@ function createTrees(num) {
         //const height = heightMap;
         const rot = Math.floor(Math.random() * 360);
         const scalar = Math.floor(Math.random() * 10) +5;
+
+        
+        if (houseCoords.xMin <= width && width <= houseCoords.xMax &&
+            houseCoords.zMin <= length && length <= houseCoords.zMax){
+                console.log("hit!");      
+                continue
+            }
        
              
         createTree(width,0,length,rot,scalar); 
