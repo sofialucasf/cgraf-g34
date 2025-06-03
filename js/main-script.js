@@ -16,6 +16,13 @@ const ovni = new THREE.Group();
 
 const ovniRotationSpeed = 1;
 
+const ovniMovingSpeed = 100;
+
+let ovniMovingUp = 0;
+let ovniMovingDown = 0;
+let ovniMovingLeft = 0;
+let ovniMovingRight = 0;
+
 const COLORS = {
     blue: {
       light: 'lightblue',
@@ -133,9 +140,6 @@ const leafsMatToon = new THREE.MeshPhongMaterial({ color: 0x006400 });
 function createScene() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xb0fcff);
-
-    // Axes Helper
-    scene.add(new THREE.AxesHelper(10));
 }
 
 function processTexture(texture){
@@ -258,7 +262,7 @@ function createMoon(){
 }
 
 function createGlobalLight() {
-    const globalLight = new THREE.DirectionalLight('white', 2);
+    const globalLight = new THREE.DirectionalLight('white', 1);
     globalLight.position.set(100, 150, 100);
     globalLight.lookAt(new THREE.Vector3(0, 0, 0));
     globalLight.castShadow = true;
@@ -361,6 +365,13 @@ function createOvni(){
     ovniCylinder.position.set(0, -6, 0);
     ovni.add(ovniCylinder);
 
+    const spotLight = new THREE.SpotLight(0xffffff, 2, 300, Math.PI / 6, 0.1, 0);
+    spotLight.position.set(0, -10, 0); // Just below the cylinder
+    spotLight.target.position.set(0, -40, 0); // Pointing further down
+    spotLight.castShadow = true;
+    ovni.add(spotLight);
+    ovni.add(spotLight.target);
+
     addBottomLight(0);
     addBottomLight(Math.PI / 4);
     addBottomLight(Math.PI / 2);
@@ -370,24 +381,8 @@ function createOvni(){
     addBottomLight(3 * Math.PI / 2);
     addBottomLight(7 * Math.PI / 4);
 
-    const spotLight = new THREE.SpotLight('blue', 2, 150, Math.PI / 6, 0.4, 2);
-    spotLight.castShadow = true;
-
-    spotLight.position.set(0, -10, 0);
-    ovni.add(spotLight);
-
-
-    const targetObject = new THREE.Object3D();
-    targetObject.position.set(0, -80, 0);
-    ovni.add(targetObject); 
-
-    spotLight.target = targetObject;
-
-    ovni.position.set(0, 150, 0);
+    ovni.position.set(0, 150, -50);
     scene.add(ovni);
-
-    const helper = new THREE.SpotLightHelper(spotLight, 5);
-    scene.add(helper);
 }
 
 function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
@@ -458,7 +453,21 @@ function createTrees(num) {
 ////////////
 function update() {
     controls.update();
-    ovni.rotation.y += ovniRotationSpeed * clock.getDelta(); 
+    const delta = clock.getDelta();
+    ovni.rotation.y += ovniRotationSpeed * delta;
+    
+    if(ovniMovingUp == 1 && ovniMovingUp * ovniMovingDown == 0){
+        ovni.position.x += ovniMovingSpeed * delta;
+    }
+    if(ovniMovingDown == 1 && ovniMovingUp * ovniMovingDown == 0){
+        ovni.position.x -= ovniMovingSpeed * delta;
+    }
+    if(ovniMovingLeft == 1 && ovniMovingLeft * ovniMovingRight == 0){
+        ovni.position.z -= ovniMovingSpeed * delta;
+    }
+    if(ovniMovingRight == 1 && ovniMovingLeft * ovniMovingRight == 0){
+        ovni.position.z += ovniMovingSpeed * delta;
+    }
 }
 
 ////////////////////////////////
@@ -477,13 +486,14 @@ function init() {
     createGlobalLight();
     createHouse();
     createOvni();  
-    processTexture(heightMap);  //nao sei se isto e assim
+    // processTexture(heightMap);  //nao sei se isto e assim
     createTrees(20);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener('keydown', onKeyDown, false);
+    window.addEventListener('keyup', onKeyUp, false);
 }
 
 
@@ -528,10 +538,36 @@ function onKeyDown(event) {
             skyLambertMaterial.map = generateStarrySkyTexture();
             skyLambertMaterial.map.needsUpdate = true;
             break;
+        case 'arrowup':
+            ovniMovingUp = 1;
+            break;
+        case 'arrowdown':
+            ovniMovingDown = 1;
+            break;
+        case 'arrowleft':
+            ovniMovingLeft = 1;
+            break;
+        case 'arrowright':
+            ovniMovingRight = 1;
+            break;
     }
 }
 
 function onKeyUp(event) {
+    switch (event.key.toLowerCase()){
+        case 'arrowup':
+            ovniMovingUp = 0;
+            break;
+        case 'arrowdown':
+            ovniMovingDown = 0;
+            break;
+        case 'arrowleft':
+            ovniMovingLeft = 0;
+            break;
+        case 'arrowright':
+            ovniMovingRight = 0;
+            break;
+    }
 }
 
 init();
