@@ -15,8 +15,8 @@ const house = new THREE.Group();
 const ovni = new THREE.Group();
 
 const ovniRotationSpeed = 1;
-
 const ovniMovingSpeed = 100;
+const diagSpeed = ovniMovingSpeed / Math.sqrt(2);
 
 let ovniMovingUp = 0;
 let ovniMovingDown = 0;
@@ -455,18 +455,16 @@ function update() {
     controls.update();
     const delta = clock.getDelta();
     ovni.rotation.y += ovniRotationSpeed * delta;
-    
-    if(ovniMovingUp == 1 && ovniMovingUp * ovniMovingDown == 0){
-        ovni.position.x += ovniMovingSpeed * delta;
-    }
-    if(ovniMovingDown == 1 && ovniMovingUp * ovniMovingDown == 0){
-        ovni.position.x -= ovniMovingSpeed * delta;
-    }
-    if(ovniMovingLeft == 1 && ovniMovingLeft * ovniMovingRight == 0){
-        ovni.position.z -= ovniMovingSpeed * delta;
-    }
-    if(ovniMovingRight == 1 && ovniMovingLeft * ovniMovingRight == 0){
-        ovni.position.z += ovniMovingSpeed * delta;
+
+    let moveX = ovniMovingUp - ovniMovingDown;
+    let moveZ = ovniMovingRight - ovniMovingLeft;
+
+    if (moveX !== 0 && moveZ !== 0) {
+        ovni.position.x += moveX * diagSpeed * delta;
+        ovni.position.z += moveZ * diagSpeed * delta;
+    } else {
+        ovni.position.x += moveX * ovniMovingSpeed * delta;
+        ovni.position.z += moveZ * ovniMovingSpeed * delta;
     }
 }
 
