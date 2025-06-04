@@ -191,8 +191,9 @@ function processTexture(texture){
 /////////////////////
 function createCameras() {
     const aspect = window.innerWidth / window.innerHeight;
-    perspectiveCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 2000);
-    perspectiveCamera.position.set(-200, 50, -200);
+    perspectiveCamera = new THREE.PerspectiveCamera(90, aspect, 0.1, 2000);
+    perspectiveCamera.lookAt(0, 80, 0);
+    perspectiveCamera.position.set(-160, 50, 200);
 }
 
 ////////////////////////
