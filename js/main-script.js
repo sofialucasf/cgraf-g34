@@ -23,6 +23,14 @@ let ovniMovingDown = 0;
 let ovniMovingLeft = 0;
 let ovniMovingRight = 0;
 
+let spotLight;
+let spotLightOn = true;
+let bottomPointLights = [];
+let pointLightOn = true;
+
+let globalLight
+let globalLightOn = true;
+
 const COLORS = {
     blue: {
       light: 'lightblue',
@@ -59,8 +67,10 @@ let groundLambertMaterial = new THREE.MeshLambertMaterial({
     map: generateFloralTexture(), 
     displacementMap: heightMap,
     displacementScale: 80,
-    side: THREE.DoubleSide 
+    side: THREE.DoubleSide,
+    shading: THREE.FlatShading
 });
+
 
 let groundPhongMaterial = new THREE.MeshPhongMaterial({ 
     map: generateFloralTexture(), 
@@ -80,7 +90,8 @@ let groundToonMaterial = new THREE.MeshToonMaterial({
 // Sky materials (BackSide so it surrounds the scene)
 let skyLambertMaterial = new THREE.MeshLambertMaterial({ 
     map: generateStarrySkyTexture(), 
-    side: THREE.BackSide 
+    side: THREE.BackSide,
+    shading: THREE.FlatShading
 });
 
 let skyPhongMaterial = new THREE.MeshPhongMaterial({ 
@@ -95,17 +106,17 @@ let skyToonMaterial = new THREE.MeshToonMaterial({
 
 
 // LambertMaterial
-const wallMatLambert = new THREE.MeshLambertMaterial({ color: 0xf5f5dc });
-const wallMatDetailLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff });
-const roofMatLambert = new THREE.MeshLambertMaterial({ color: 0xffa500 });
-const doorMatLambert = new THREE.MeshLambertMaterial({ color: 0x632e00 });
-const windowMatLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff });
-const ovniBodyMatLambert = new THREE.MeshLambertMaterial({ color: 0x909090 });
-const ovniCylinderMatLambert = new THREE.MeshLambertMaterial({ color: 0x707070 });
-const ovniGlassMatLambert = new THREE.MeshLambertMaterial({ color: 0x70c6ff });
-const ovniLightsMatLambert = new THREE.MeshLambertMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
-const trunkMatLambert = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
-const leafsMatLambert = new THREE.MeshPhongMaterial({ color: 0x006400 });
+const wallMatLambert = new THREE.MeshLambertMaterial({ color: 0xf5f5dc, shading: THREE.FlatShading });
+const wallMatDetailLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff, shading: THREE.FlatShading });
+const roofMatLambert = new THREE.MeshLambertMaterial({ color: 0xffa500, shading: THREE.FlatShading });
+const doorMatLambert = new THREE.MeshLambertMaterial({ color: 0x632e00, shading: THREE.FlatShading });
+const windowMatLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff, shading: THREE.FlatShading });
+const ovniBodyMatLambert = new THREE.MeshLambertMaterial({ color: 0x909090, shading: THREE.FlatShading });
+const ovniCylinderMatLambert = new THREE.MeshLambertMaterial({ color: 0x707070, shading: THREE.FlatShading });
+const ovniGlassMatLambert = new THREE.MeshLambertMaterial({ color: 0x70c6ff, shading: THREE.FlatShading });
+const ovniLightsMatLambert = new THREE.MeshLambertMaterial({color: 0xfff838, opacity: 0.4, shading: THREE.FlatShading, emissive: 0xfff838, emissiveIntensity: 1});
+const trunkMatLambert = new THREE.MeshPhongMaterial({ color: 0xCC6600, shading: THREE.FlatShading });
+const leafsMatLambert = new THREE.MeshPhongMaterial({ color: 0x006400, shading: THREE.FlatShading });
 
 // PhongMaterial
 const wallMatPhong = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
@@ -116,7 +127,7 @@ const windowMatPhong = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 const ovniBodyMatPhong = new THREE.MeshPhongMaterial({ color: 0x909090 });
 const ovniCylinderMatPhong = new THREE.MeshPhongMaterial({ color: 0x707070 });
 const ovniGlassMatPhong = new THREE.MeshPhongMaterial({ color: 0x70c6ff });
-const ovniLightsMatPhong = new THREE.MeshPhongMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
+const ovniLightsMatPhong = new THREE.MeshPhongMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 1});
 const trunkMatPhong = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatPhong = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
@@ -129,7 +140,7 @@ const windowMatToon = new THREE.MeshToonMaterial({ color: 0x0000ff });
 const ovniBodyMatToon = new THREE.MeshToonMaterial({ color: 0x909090 });
 const ovniCylinderMatToon = new THREE.MeshToonMaterial({ color: 0x707070 });
 const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
-const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 2, opacity: 0.4});
+const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 1});
 const trunkMatToon = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
 const leafsMatToon = new THREE.MeshPhongMaterial({ color: 0x006400 });
 
@@ -232,6 +243,7 @@ function createGround(){
     const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);   
 
     groundGeometry.computeVertexNormals();
+    groundGeometry.normalsNeedUpdate = true;
 
     let groundMesh = new THREE.Mesh(groundGeometry, groundLambertMaterial)
     groundMesh.castShadow = true;
@@ -243,6 +255,7 @@ function createGround(){
 
 function createSkyDome(){
     const skyGeometry = new THREE.SphereGeometry(250, 32, 32);
+    skyGeometry.normalsNeedUpdate = true;
 
     const skyDome = new THREE.Mesh(skyGeometry, skyLambertMaterial);
     scene.add(skyDome);
@@ -250,6 +263,7 @@ function createSkyDome(){
 
 function createMoon(){
     const moonGeometry = new THREE.SphereGeometry(20, 32, 32);
+    moonGeometry.normalsNeedUpdate = true;
     const moonMaterial = new THREE.MeshStandardMaterial({
         color: COLORS.grey.light,
         emissive: 'white',
@@ -262,8 +276,8 @@ function createMoon(){
 }
 
 function createGlobalLight() {
-    const globalLight = new THREE.DirectionalLight('white', 1);
-    globalLight.position.set(100, 150, 100);
+    globalLight = new THREE.DirectionalLight('white', 1);
+    globalLight.position.set(500, 500, 500);
     globalLight.lookAt(new THREE.Vector3(0, 0, 0));
     globalLight.castShadow = true;
     scene.add(globalLight);
@@ -271,6 +285,7 @@ function createGlobalLight() {
  
 function createWallFace(p1, p2, p3, p4, material) {
     const geom = new THREE.BufferGeometry();
+    geom.normalsNeedUpdate = true;
     const verts = new Float32Array([
       ...p1, ...p2, ...p3,
       ...p3, ...p4, ...p1,
@@ -303,11 +318,13 @@ function createWallFace(p1, p2, p3, p4, material) {
 
     // Door
     const door = new THREE.Mesh(new THREE.PlaneGeometry(10, 15), doorMatLambert);
+    door.normalsNeedUpdate = true;
     door.position.set(0, 7.5, 20.1);
     house.add(door);
 
     // Windows
     const windowGeom = new THREE.PlaneGeometry(8, 8);
+    windowGeom.normalsNeedUpdate = true;
     
     const winL1 = new THREE.Mesh(windowGeom, windowMatLambert);
     winL1.position.set(-20.1, 13, -20);
@@ -343,11 +360,13 @@ function addBottomLight(angle) {
     const y = -30 * 0.2; 
 
     const light = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), ovniLightsMatLambert);
+    light.normalsNeedUpdate = true;
     light.position.set(x, y, z);
 
-    const pointLight = new THREE.PointLight(COLORS.yellow.light, 20, 100);
-    pointLight.position.set(x, y, z);
+    const pointLight = new THREE.PointLight(COLORS.yellow.light, 10, 100);
+    pointLight.position.set(x, y - 5, z);
     pointLight.castShadow = true;
+    bottomPointLights.push(pointLight);
     ovni.add(pointLight);
 
     ovni.add(light);
@@ -355,17 +374,20 @@ function addBottomLight(angle) {
 
 function createOvni(){
     const ovniBody = new THREE.Mesh(new THREE.SphereGeometry(40), ovniBodyMatLambert);
+    ovniBody.normalsNeedUpdate = true;
     ovniBody.scale.set(1, 0.2,1);
     ovni.add(ovniBody);
 
     const ovniGlass = new THREE.Mesh(new THREE.SphereGeometry(22, 32, 16, 0, Math.PI * 2, 0, Math.PI/2), ovniGlassMatLambert);
+    ovniGlass.normalsNeedUpdate = true;
     ovni.add(ovniGlass);
 
     const ovniCylinder = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 5), ovniCylinderMatLambert);
+    ovniCylinder.normalsNeedUpdate = true;
     ovniCylinder.position.set(0, -6, 0);
     ovni.add(ovniCylinder);
 
-    const spotLight = new THREE.SpotLight(0xffffff, 2, 300, Math.PI / 6, 0.1, 0);
+    spotLight = new THREE.SpotLight(0xffffff, 2, 300, Math.PI / 6, 0.1, 0);
     spotLight.position.set(0, -10, 0); // Just below the cylinder
     spotLight.target.position.set(0, -40, 0); // Pointing further down
     spotLight.castShadow = true;
@@ -390,6 +412,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
 
     // Tronco grande
     const trunkGeo = new THREE.CylinderGeometry(0.5, 0.6, 5, 16);
+    trunkGeo.normalsNeedUpdate = true;
     const trunk = new THREE.Mesh(trunkGeo, trunkMatLambert);
     trunk.rotation.z = THREE.MathUtils.degToRad(10);
     trunk.position.y = 2.0;
@@ -397,6 +420,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
 
     // Ramo pequeno
     const branchGeo = new THREE.CylinderGeometry(0.2, 0.25, 2.5, 12);
+    branchGeo.normalsNeedUpdate = true;
     const branch = new THREE.Mesh(branchGeo, trunkMatLambert);
     branch.rotation.z = THREE.MathUtils.degToRad(-30);
     branch.position.set(.8, 4, 0);
@@ -406,6 +430,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     const numElipsoids = Math.floor(Math.random() * 3) +1; 
     for (let i = 0; i < numElipsoids; i++) {
       const leafsGeo = new THREE.SphereGeometry(1.5, 16, 16);
+      leafsGeo.normalsNeedUpdate = true;
       const leafs = new THREE.Mesh(leafsGeo, leafsMatLambert);
       leafs.receiveShadow = true;
       leafs.scale.set(1.2, 0.8, 1.2);
@@ -439,14 +464,43 @@ function createTrees(num) {
    
 }
 
-//////////////////////
-/* CHECK COLLISIONS */
-//////////////////////
+function toggleOvniPointLights() {
+    if (pointLightOn) {
+        bottomPointLights.forEach((light, index) => {
+            light.intensity = 10;
+            ovniLightsMatLambert.emissiveIntensity = 1;
+            ovniLightsMatPhong.emissiveIntensity = 1;
+            ovniLightsMatToon.emissiveIntensity = 1;
+        
+        });
+    }
+    else {
+        bottomPointLights.forEach((light, index) => {
+            light.intensity = 0;
+            ovniLightsMatLambert.emissiveIntensity = 0;
+            ovniLightsMatPhong.emissiveIntensity = 0;
+            ovniLightsMatToon.emissiveIntensity = 0;
+        });
+    }
+}
 
-///////////////////////
-/* HANDLE COLLISIONS */
-///////////////////////
+function toggleOvniSpotlight(){
+    if(spotLightOn) {
+        spotLight.intensity = 2;
+    }
+    else {
+        spotLight.intensity = 0;
+    }
+}
 
+function toggleGlobalLight(){
+    if(globalLightOn){
+        globalLight.intensity = 1;
+    }
+    else{
+        globalLight.intensity = 0;
+    }
+}
 
 ////////////
 /* UPDATE */
@@ -548,6 +602,19 @@ function onKeyDown(event) {
         case 'arrowright':
             ovniMovingRight = 1;
             break;
+        case 's':
+            spotLightOn = !spotLightOn;
+            toggleOvniSpotlight();
+            break;
+        case 'p':
+            pointLightOn = !pointLightOn;
+            toggleOvniPointLights();
+            break;
+        case 'd':
+            globalLightOn = !globalLightOn;
+            toggleGlobalLight();
+            break;
+
     }
 }
 
