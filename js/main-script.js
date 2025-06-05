@@ -30,6 +30,9 @@ let spotLightOn = true;
 let bottomPointLights = [];
 let pointLightOn = true;
 
+let groundMap = generateFloralTexture();
+let skyMap = generateStarrySkyTexture(); 
+
 let globalLight
 let globalLightOn = true;
 
@@ -65,66 +68,78 @@ const COLORS = {
 let heightMap = new THREE.TextureLoader().load('../heightmap.png');
     heightMap.wrapS = heightMap.wrapT = THREE.RepeatWrapping;
 
-let groundBasicMaterial = new THREE.MeshLambertMaterial({ 
-    map: generateFloralTexture(), 
-    displacementMap: heightMap,
+let groundLambertMaterial = new THREE.MeshLambertMaterial({ 
     side: THREE.DoubleSide,
+    flatShading : true
 });
 
-
 let groundPhongMaterial = new THREE.MeshPhongMaterial({ 
-    map: generateFloralTexture(), 
-    displacementMap: heightMap,
     side: THREE.DoubleSide 
 });
 
 let groundToonMaterial = new THREE.MeshToonMaterial({ 
-    map: generateFloralTexture(), 
-    displacementMap: heightMap,
     side: THREE.DoubleSide 
 });
 
-let groundMaterial = groundBasicMaterial;
+let groundBasicMaterial = new THREE.MeshBasicMaterial({ 
+    side: THREE.DoubleSide 
+});
+
+let groundMaterial = groundLambertMaterial;
 
 
 // Sky materials (BackSide so it surrounds the scene)
-let skyBasicMaterial = new THREE.MeshLambertMaterial({ 
-    map: generateStarrySkyTexture(), 
+let skyLambertMaterial = new THREE.MeshLambertMaterial({ 
     side: THREE.BackSide,
-    shading: THREE.FlatShading
+    flatShading : true
 });
 
 let skyPhongMaterial = new THREE.MeshPhongMaterial({ 
-    map: generateStarrySkyTexture(), 
     side: THREE.BackSide 
 });
 
 let skyToonMaterial = new THREE.MeshToonMaterial({ 
-    map: generateStarrySkyTexture(), 
     side: THREE.BackSide 
 });
 
-let skyMaterial = skyBasicMaterial;
+let skyBasicMaterial = new THREE.MeshBasicMaterial({ 
+    side: THREE.BackSide 
+});
+
+let skyMaterial = skyLambertMaterial;
 
 // BasicMaterial
-const wallMatBasic = new THREE.MeshLambertMaterial({ color: 0xf5f5dc, shading: THREE.FlatShading });
-const wallMatDetailBasic = new THREE.MeshLambertMaterial({ color: 0x0000ff, shading: THREE.FlatShading });
-const roofMatBasic = new THREE.MeshLambertMaterial({ color: 0xffa500, shading: THREE.FlatShading });
-const doorMatBasic = new THREE.MeshLambertMaterial({ color: 0x632e00, shading: THREE.FlatShading });
-const windowMatBasic = new THREE.MeshLambertMaterial({ color: 0x0000ff, shading: THREE.FlatShading });
-const ovniBodyMatBasic = new THREE.MeshLambertMaterial({ color: 0x909090, shading: THREE.FlatShading });
-const ovniCylinderMatBasic = new THREE.MeshLambertMaterial({ color: 0x707070, shading: THREE.FlatShading });
-const ovniGlassMatBasic = new THREE.MeshLambertMaterial({ color: 0x70c6ff, shading: THREE.FlatShading });
-const ovniLightsMatBasic = new THREE.MeshLambertMaterial({color: 0xfff838, opacity: 0.4, shading: THREE.FlatShading, emissive: 0xfff838, emissiveIntensity: 1});
-const trunkMatBasic = new THREE.MeshLambertMaterial({ color: 0xCC6600, shading: THREE.FlatShading });
-const leafsMatBasic = new THREE.MeshLambertMaterial({ color: 0x2b9448, shading: THREE.FlatShading });
+const wallMatBasic = new THREE.MeshBasicMaterial({ color: 0xf5f5dc});
+const wallMatDetailBasic = new THREE.MeshBasicMaterial({ color: 0x0000ff});
+const roofMatBasic = new THREE.MeshBasicMaterial({ color: 0xffa500});
+const doorMatBasic = new THREE.MeshBasicMaterial({ color: 0x632e00});
+const windowMatBasic = new THREE.MeshBasicMaterial({ color: 0x005eff});
+const ovniBodyMatBasic = new THREE.MeshBasicMaterial({ color: 0x909090});
+const ovniCylinderMatBasic = new THREE.MeshBasicMaterial({ color: 0x707070});
+const ovniGlassMatBasic = new THREE.MeshBasicMaterial({ color: 0x70c6ff});
+const ovniLightsMatBasic = new THREE.MeshBasicMaterial({color: 0xfff838});
+const trunkMatBasic = new THREE.MeshBasicMaterial({ color: 0xCC6600});
+const leafsMatBasic = new THREE.MeshBasicMaterial({ color: 0x2b9448});
+
+// LambertMaterial
+const wallMatLambert = new THREE.MeshLambertMaterial({ color: 0xf5f5dc, flatShading : true });
+const wallMatDetailLambert = new THREE.MeshLambertMaterial({ color: 0x0000ff, flatShading : true });
+const roofMatLambert = new THREE.MeshLambertMaterial({ color: 0xffa500, flatShading : true });
+const doorMatLambert = new THREE.MeshLambertMaterial({ color: 0x632e00, flatShading : true });
+const windowMatLambert = new THREE.MeshLambertMaterial({ color: 0x005eff, flatShading : true });
+const ovniBodyMatLambert = new THREE.MeshLambertMaterial({ color: 0x909090, flatShading : true });
+const ovniCylinderMatLambert = new THREE.MeshLambertMaterial({ color: 0x707070, flatShading : true });
+const ovniGlassMatLambert = new THREE.MeshLambertMaterial({ color: 0x70c6ff, flatShading : true });
+const ovniLightsMatLambert = new THREE.MeshLambertMaterial({color: 0xfff838, opacity: 0.4, flatShading : true, emissive: 0xfff838, emissiveIntensity: 1});
+const trunkMatLambert = new THREE.MeshLambertMaterial({ color: 0xCC6600, flatShading : true });
+const leafsMatLambert = new THREE.MeshLambertMaterial({ color: 0x2b9448, flatShading : true });
 
 // PhongMaterial
 const wallMatPhong = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
 const wallMatDetailPhong = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 const roofMatPhong = new THREE.MeshPhongMaterial({ color: 0xffa500 });
 const doorMatPhong = new THREE.MeshPhongMaterial({ color: 0x632e00 });
-const windowMatPhong = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+const windowMatPhong = new THREE.MeshPhongMaterial({ color: 0x005eff });
 const ovniBodyMatPhong = new THREE.MeshPhongMaterial({ color: 0x909090 });
 const ovniCylinderMatPhong = new THREE.MeshPhongMaterial({ color: 0x707070 });
 const ovniGlassMatPhong = new THREE.MeshPhongMaterial({ color: 0x70c6ff });
@@ -137,7 +152,7 @@ const wallMatToon = new THREE.MeshToonMaterial({ color: 0xf5f5dc });
 const wallMatDetailToon = new THREE.MeshToonMaterial({ color: 0x0000ff });
 const roofMatToon = new THREE.MeshToonMaterial({ color: 0xffa500 });
 const doorMatToon = new THREE.MeshToonMaterial({ color: 0x632e00 });
-const windowMatToon = new THREE.MeshToonMaterial({ color: 0x0000ff });
+const windowMatToon = new THREE.MeshToonMaterial({ color: 0x005eff });
 const ovniBodyMatToon = new THREE.MeshToonMaterial({ color: 0x909090 });
 const ovniCylinderMatToon = new THREE.MeshToonMaterial({ color: 0x707070 });
 const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
@@ -145,21 +160,22 @@ const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive:
 const trunkMatToon = new THREE.MeshToonMaterial({ color: 0xCC6600 });
 const leafsMatToon = new THREE.MeshToonMaterial({ color: 0x2b9448 });
 
-let wallMaterial = wallMatBasic;
-let wallMaterialDetail = wallMatDetailBasic;
-let roofMaterial = roofMatBasic;
-let doorMaterial = doorMatBasic;
-let windowMaterial = windowMatBasic;
-let ovniBodyMaterial = ovniBodyMatBasic;
-let ovniCylinderMaterial = ovniCylinderMatBasic;
-let ovniGlassMaterial = ovniGlassMatBasic;
-let ovniLightsMaterial = ovniLightsMatBasic;
-let trunkMaterial = trunkMatBasic;
-let leafsMaterial = leafsMatBasic;
+let wallMaterial = wallMatLambert;
+let wallMaterialDetail = wallMatDetailLambert;
+let roofMaterial = roofMatLambert;
+let doorMaterial = doorMatLambert;
+let windowMaterial = windowMatLambert;
+let ovniBodyMaterial = ovniBodyMatLambert;
+let ovniCylinderMaterial = ovniCylinderMatLambert;
+let ovniGlassMaterial = ovniGlassMatLambert;
+let ovniLightsMaterial = ovniLightsMatLambert;
+let trunkMaterial = trunkMatLambert;
+let leafsMaterial = leafsMatLambert;
 
-let BasicOn = true;
+let LambertOn = true;
 let phongOn = false;
 let toonOn = false;
+let basicOn = false;
 
 const houseCoords = {
     xMin: -147 - bufferZone, 
@@ -233,6 +249,13 @@ function createGroundFromHeightmap(url, onComplete) {
         vertices.needsUpdate = true;
         geometry.computeVertexNormals();
 
+        let map = generateFloralTexture();
+
+        groundLambertMaterial.map = groundMap;
+        groundBasicMaterial.map = groundMap;
+        groundPhongMaterial.map = groundMap;
+        groundToonMaterial.map = groundMap;
+
         const mesh = new THREE.Mesh(geometry, groundMaterial);
         mesh.userData.isHeightmapGround = true;
         mesh.castShadow = true;
@@ -305,6 +328,10 @@ function createSkyDome(){
     skyGeometry.userData.type = "skyDome";
     skyGeometry.normalsNeedUpdate = true;
 
+    skyLambertMaterial.map = skyMap;
+    skyBasicMaterial.map = skyMap;
+    skyPhongMaterial.map = skyMap;
+    skyToonMaterial.map = skyMap;
     const skyDome = new THREE.Mesh(skyGeometry, skyMaterial);
     scene.add(skyDome);
 }
@@ -320,7 +347,7 @@ function createMoon(){
     });
 
     const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
-    moonMesh.position.set(100, 150, 100);
+    moonMesh.position.set(100, 200, 100);
     scene.add(moonMesh);
 }
 
@@ -400,19 +427,24 @@ function createWallFace(p1, p2, p3, p4, material) {
     house.add(mesh);
 
     // Door
-    mesh = house.add(createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMaterial));
+    mesh = createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMaterial);
     mesh.userData.type = "door";
+    house.add(mesh);
    
     // Windows Right
-    mesh = house.add(createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMaterial ));
+    mesh = createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMaterial );
     mesh.userData.type = "window";
-    mesh = house.add(createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMaterial));
+    house.add(mesh);
+    mesh = createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMaterial);
     mesh.userData.type = "window";
+    house.add(mesh);
     // Windows Left
-    mesh = house.add(createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMaterial));
+    mesh = createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMaterial);
     mesh.userData.type = "window";
-    mesh = house.add(createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMaterial));
+    house.add(mesh);
+    mesh = createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMaterial);
     mesh.userData.type = "window";
+    house.add(mesh);
 
     house.position.set(-120,-10,-40);
     house.rotateY(Math.PI / 6);
@@ -432,7 +464,7 @@ function addBottomLight(angle) {
     light.normalsNeedUpdate = true;
     light.position.set(x, y, z);
 
-    const pointLight = new THREE.PointLight(COLORS.yellow.light, 10, 100);
+    const pointLight = new THREE.PointLight(COLORS.yellow.light, 100, 1000);
     pointLight.position.set(x, y - 5, z);
     pointLight.castShadow = true;
     bottomPointLights.push(pointLight);
@@ -579,20 +611,20 @@ function toggleGlobalLight(){
 }
 
 function switchMaterial(){
-    if (BasicOn){
-        groundMaterial = groundBasicMaterial;
-        skyMaterial = skyBasicMaterial;
-        wallMaterial = wallMatBasic;
-        wallMaterialDetail = wallMatDetailBasic;
-        roofMaterial = roofMatBasic;
-        doorMaterial = doorMatBasic;
-        windowMaterial = windowMatBasic;
-        ovniBodyMaterial = ovniBodyMatBasic;
-        ovniCylinderMaterial = ovniCylinderMatBasic;
-        ovniGlassMaterial = ovniGlassMatBasic;
-        ovniLightsMaterial = ovniLightsMatBasic;
-        trunkMaterial = trunkMatBasic;
-        leafsMaterial = leafsMatBasic;
+    if (LambertOn){
+        groundMaterial = groundLambertMaterial;
+        skyMaterial = skyLambertMaterial;
+        wallMaterial = wallMatLambert;
+        wallMaterialDetail = wallMatDetailLambert;
+        roofMaterial = roofMatLambert;
+        doorMaterial = doorMatLambert;
+        windowMaterial = windowMatLambert;
+        ovniBodyMaterial = ovniBodyMatLambert;
+        ovniCylinderMaterial = ovniCylinderMatLambert;
+        ovniGlassMaterial = ovniGlassMatLambert;
+        ovniLightsMaterial = ovniLightsMatLambert;
+        trunkMaterial = trunkMatLambert;
+        leafsMaterial = leafsMatLambert;
     }
     else if(phongOn){
         groundMaterial = groundPhongMaterial;
@@ -624,6 +656,21 @@ function switchMaterial(){
         trunkMaterial = trunkMatToon;
         leafsMaterial = leafsMatToon;
     }
+    else if(basicOn){
+        groundMaterial = groundBasicMaterial;
+        skyMaterial = skyBasicMaterial;
+        wallMaterial = wallMatBasic;
+        wallMaterialDetail = wallMatDetailBasic;
+        roofMaterial = roofMatBasic;
+        doorMaterial = doorMatBasic;
+        windowMaterial = windowMatBasic;
+        ovniBodyMaterial = ovniBodyMatBasic;
+        ovniCylinderMaterial = ovniCylinderMatBasic;
+        ovniGlassMaterial = ovniGlassMatBasic;
+        ovniLightsMaterial = ovniLightsMatBasic;
+        trunkMaterial = trunkMatBasic;
+        leafsMaterial = leafsMatBasic;
+    }
 
     updateMaterials();
 }
@@ -634,13 +681,9 @@ function updateMaterials(){
         if (obj.isMesh && obj.geometry.type === "PlaneGeometry") {
         if (!obj.userData.isHeightmapGround) {
             obj.material = groundMaterial;
-            obj.material.displacementMap = heightMap;
-            obj.material.displacementScale = 80;
             obj.material.needsUpdate = true;
         } else {
             obj.material = groundMaterial;
-            obj.material.displacementMap = null;
-            obj.material.displacementScale = 0;
             obj.material.needsUpdate = true;
         }
     }
@@ -738,9 +781,7 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
     createScene();
-    //createGround();
     createGroundFromHeightmap('heightmap.png', groundMesh => {
         scene.add(groundMesh);
         createTrees(20,groundMesh);
@@ -795,11 +836,19 @@ function onWindowResize() {
 function onKeyDown(event) {
     switch (event.key.toLowerCase()){
         case '1':
-            groundMaterial.map = generateFloralTexture();
+            groundMap = generateFloralTexture();
+            groundLambertMaterial.map = groundMap;
+            groundPhongMaterial.map = groundMap;
+            groundToonMaterial.map = groundMap;
+            groundBasicMaterial.map = groundMap;
             groundMaterial.map.needsUpdate = true;
             break;
         case '2':
-            skyMaterial.map = generateStarrySkyTexture();
+            skyMap = generateStarrySkyTexture();
+            skyLambertMaterial.map = skyMap;
+            skyPhongMaterial.map = skyMap;
+            skyToonMaterial.map = skyMap;
+            skyBasicMaterial.map = skyMap;
             skyMaterial.map.needsUpdate = true;
             break;
         case 'arrowup':
@@ -827,24 +876,35 @@ function onKeyDown(event) {
             toggleGlobalLight();
             break;
         case 'q':
-            if(BasicOn){break;}
-            BasicOn = true;
+            if(LambertOn){break;}
+            LambertOn = true;
             phongOn = false;
             toonOn = false;
+            basicOn = false;
             switchMaterial();
             break;
         case 'w':
             if(phongOn){break;}
-            BasicOn = false;
+            LambertOn = false;
             phongOn = true;
             toonOn = false;
+            basicOn = false;
             switchMaterial();
             break;
         case 'e':
             if(toonOn){break;}
-            BasicOn = false;
+            LambertOn = false;
             phongOn = false;
             toonOn = true;
+            basicOn = false;
+            switchMaterial();
+            break;
+        case 'r':
+            if(basicOn){break;}
+            LambertOn = false;
+            phongOn = false;
+            toonOn = false;
+            basicOn = true;
             switchMaterial();
             break;
     }
