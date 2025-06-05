@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 
 //////////////////////
@@ -7,7 +8,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 //////////////////////
 
 let scene, renderer;
-let perspectiveCamera, controls;
+let activeCamera ,perspectiveCamera, fixedcamera, controls;
+
+let usingStereoCamera = false;
+let usingPerspectiveCamera = true;
+let usingFixedCamera = false;
 
 const clock = new THREE.Clock();
 
@@ -18,6 +23,8 @@ const ovni = new THREE.Group();
 const ovniRotationSpeed = 1;
 const ovniMovingSpeed = 100;
 const diagSpeed = ovniMovingSpeed / Math.sqrt(2);
+
+const meshList = [];
 
 let bufferZone = 20;
 let ovniMovingUp = 0;
@@ -107,6 +114,31 @@ let skyBasicMaterial = new THREE.MeshBasicMaterial({
 });
 
 let skyMaterial = skyLambertMaterial;
+
+let moonLambertMaterial = new THREE.MeshLambertMaterial({
+    color: COLORS.grey.light,
+    emissive: 'white',
+    emissiveIntensity: 5,
+    flatShading: true
+});
+
+let moonPhongMaterial = new THREE.MeshPhongMaterial({
+    color: COLORS.grey.light,
+    emissive: 'white',
+    emissiveIntensity: 5
+});
+
+let moonToonMaterial = new THREE.MeshToonMaterial({
+    color: COLORS.grey.light,
+    emissive: 'white',
+    emissiveIntensity: 5
+});
+
+let moonBasicMaterial = new THREE.MeshBasicMaterial({
+    color: COLORS.grey.light,
+});
+
+let moonMaterial = moonLambertMaterial;
 
 // BasicMaterial
 const wallMatBasic = new THREE.MeshBasicMaterial({ color: 0xf5f5dc});
@@ -200,8 +232,14 @@ function createScene() {
 function createCameras() {
     const aspect = window.innerWidth / window.innerHeight;
     perspectiveCamera = new THREE.PerspectiveCamera(90, aspect, 0.1, 2000);
-    perspectiveCamera.lookAt(0, 80, 0);
     perspectiveCamera.position.set(-160, 50, 200);
+    perspectiveCamera.lookAt(0, 80, 0);
+
+    fixedcamera = new THREE.PerspectiveCamera(90, aspect, 0.1, 2000);
+    fixedcamera.position.set(-150, 150, 150);
+    fixedcamera.lookAt(0, 50, 0);
+
+    activeCamera = perspectiveCamera;
 }
 
 ////////////////////////
@@ -257,7 +295,8 @@ function createGroundFromHeightmap(url, onComplete) {
         groundToonMaterial.map = groundMap;
 
         const mesh = new THREE.Mesh(geometry, groundMaterial);
-        mesh.userData.isHeightmapGround = true;
+        mesh.userData.type = 'ground';
+        meshList.push(mesh);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.position.y = -60;
@@ -325,7 +364,6 @@ function generateStarrySkyTexture() {
 
 function createSkyDome(){
     const skyGeometry = new THREE.SphereGeometry(250, 32, 32);
-    skyGeometry.userData.type = "skyDome";
     skyGeometry.normalsNeedUpdate = true;
 
     skyLambertMaterial.map = skyMap;
@@ -333,21 +371,19 @@ function createSkyDome(){
     skyPhongMaterial.map = skyMap;
     skyToonMaterial.map = skyMap;
     const skyDome = new THREE.Mesh(skyGeometry, skyMaterial);
+    skyDome.userData.type = "skyDome";
+    meshList.push(skyDome);
     scene.add(skyDome);
 }
 
 function createMoon(){
     const moonGeometry = new THREE.SphereGeometry(20, 32, 32);
-    moonGeometry.userData.type = "moon";
     moonGeometry.normalsNeedUpdate = true;
-    const moonMaterial = new THREE.MeshStandardMaterial({
-        color: COLORS.grey.light,
-        emissive: 'white',
-        emissiveIntensity: 5
-    });
 
     const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
-    moonMesh.position.set(100, 200, 100);
+    moonMesh.userData.type = "moon";
+    meshList.push(moonMesh);
+    moonMesh.position.set(100, 170, 100);
     scene.add(moonMesh);
 }
 
@@ -378,72 +414,89 @@ function createWallFace(p1, p2, p3, p4, material) {
     // Walls
     mesh = createWallFace( [-20, 5 ,20], [20, 5 ,20], [20, 20 ,20], [-20, 20 ,20], wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20, 0 ,20], [20, 0 ,-40], [20, 20 ,-40], [20, 20 ,20], wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20, 0 ,-40], [-20, 0 ,-40], [-20, 20 ,-40], [20, 20 ,-40], wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [-20, 0 ,-40], [-20, 0 ,20], [-20, 20 ,20], [-20, 20 ,-40], wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     // Details (bottom)
     mesh = createWallFace( [-20.05, 0 ,20.05], [20.05, 0 ,20.05], [20.05, 5 ,20.05], [-20.05, 5 ,20.05], wallMaterialDetail);
     mesh.userData.type = "detail";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20.05, 0 ,20.05], [20.05, 0 ,-40.05], [20.05, 5 ,-40.05], [20, 5 ,20.05], wallMaterialDetail);
     mesh.userData.type = "detail";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20.05, 0 ,-40.05], [-20.05, 0 ,-40.05], [-20.05, 5 ,-40.05], [20.05, 5 ,-40.05], wallMaterialDetail);
     mesh.userData.type = "detail";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [-20.05, 0 ,-40.05], [-20.05, 0 ,20.05], [-20.05, 5 ,20.05], [-20.05, 5 ,-40.05], wallMaterialDetail);
     mesh.userData.type = "detail";
+    meshList.push(mesh);
     house.add(mesh);
 
     // Roof
     mesh = createWallFace( [-20, 20 ,20] , [20, 20 ,20] , [0, 30 ,20] , [-20, 20 ,20] , wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20, 20 ,20] , [20, 20 ,-40] , [0, 30 ,-40] , [0, 30 ,20] , roofMaterial);
     mesh.userData.type = "roof";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [20, 20 ,-40], [-20, 20 ,-40] , [0, 30 ,-40] , [20, 20 ,-40] , wallMaterial);
     mesh.userData.type = "wall";
+    meshList.push(mesh);
     house.add(mesh);
 
     mesh = createWallFace( [-20, 20 ,-40] , [-20, 20 ,20] , [0, 30 ,20] , [0, 30 ,-40], roofMaterial);
     mesh.userData.type = "roof";
+    meshList.push(mesh);
     house.add(mesh);
 
     // Door
     mesh = createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMaterial);
     mesh.userData.type = "door";
+    meshList.push(mesh);
     house.add(mesh);
    
     // Windows Right
     mesh = createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMaterial );
     mesh.userData.type = "window";
+    meshList.push(mesh);
     house.add(mesh);
     mesh = createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMaterial);
     mesh.userData.type = "window";
+    meshList.push(mesh);
     house.add(mesh);
     // Windows Left
     mesh = createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMaterial);
     mesh.userData.type = "window";
+    meshList.push(mesh);
     house.add(mesh);
     mesh = createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMaterial);
     mesh.userData.type = "window";
+    meshList.push(mesh);
     house.add(mesh);
 
     house.position.set(-120,-10,-40);
@@ -461,10 +514,11 @@ function addBottomLight(angle) {
 
     const light = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), ovniLightsMaterial);
     light.userData.type = "ovniLight";
+    meshList.push(light);
     light.normalsNeedUpdate = true;
     light.position.set(x, y, z);
 
-    const pointLight = new THREE.PointLight(COLORS.yellow.light, 100, 1000);
+    const pointLight = new THREE.PointLight(COLORS.yellow.light, 150, 1000);
     pointLight.position.set(x, y - 5, z);
     pointLight.castShadow = true;
     bottomPointLights.push(pointLight);
@@ -476,6 +530,7 @@ function addBottomLight(angle) {
 function createOvni(){
     const ovniBody = new THREE.Mesh(new THREE.SphereGeometry(40), ovniBodyMaterial);
     ovniBody.userData.type = "ovniBody";
+    meshList.push(ovniBody);
     ovniBody.normalsNeedUpdate = true;
     ovniBody.scale.set(1, 0.2,1);
     ovni.add(ovniBody);
@@ -483,10 +538,12 @@ function createOvni(){
     const ovniGlass = new THREE.Mesh(new THREE.SphereGeometry(22, 32, 16, 0, Math.PI * 2, 0, Math.PI/2), ovniGlassMaterial);
     ovniGlass.userData.type = "ovniGlass";
     ovniGlass.normalsNeedUpdate = true;
+    meshList.push(ovniGlass);
     ovni.add(ovniGlass);
 
     const ovniCylinder = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 5), ovniCylinderMaterial);
     ovniCylinder.userData.type = "ovniCylinder";
+    meshList.push(ovniCylinder);
     ovniCylinder.normalsNeedUpdate = true;
     ovniCylinder.position.set(0, -6, 0);
     ovni.add(ovniCylinder);
@@ -507,7 +564,7 @@ function createOvni(){
     addBottomLight(3 * Math.PI / 2);
     addBottomLight(7 * Math.PI / 4);
 
-    ovni.position.set(0, 150, -50);
+    ovni.position.set(0, 120, -50);
     scene.add(ovni);
 }
 
@@ -519,6 +576,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     trunkGeo.normalsNeedUpdate = true;
     const trunk = new THREE.Mesh(trunkGeo, trunkMaterial);
     trunk.userData.type = "trunk";
+    meshList.push(trunk);
     trunk.rotation.z = THREE.MathUtils.degToRad(10);
     trunk.position.y = 2.0;
     tree.add(trunk);
@@ -528,6 +586,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     branchGeo.normalsNeedUpdate = true;
     const branch = new THREE.Mesh(branchGeo, trunkMaterial);
     branch.userData.type = "branch";
+    meshList.push(branch);
     branch.rotation.z = THREE.MathUtils.degToRad(-30);
     branch.position.set(.8, 4, 0);
     tree.add(branch);
@@ -539,6 +598,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
         leafsGeo.normalsNeedUpdate = true;
         const leafs = new THREE.Mesh(leafsGeo, leafsMaterial);
         leafs.userData.type = "leafs";
+        meshList.push(leafs);
         leafs.receiveShadow = true;
         leafs.scale.set(1.2, 0.8, 1.2);
         leafs.position.set((Math.random() - 0.5) * 1.5,
@@ -580,7 +640,7 @@ function createTrees(num,mesh) {
 function toggleOvniPointLights() {
     if (pointLightOn) {
         bottomPointLights.forEach((light, index) => {
-            light.intensity = 10;
+            light.intensity = 150;
             ovniLightsMaterial.emissiveIntensity = 1;        
         });
     }
@@ -625,6 +685,7 @@ function switchMaterial(){
         ovniLightsMaterial = ovniLightsMatLambert;
         trunkMaterial = trunkMatLambert;
         leafsMaterial = leafsMatLambert;
+        moonMaterial = moonLambertMaterial;
     }
     else if(phongOn){
         groundMaterial = groundPhongMaterial;
@@ -640,6 +701,7 @@ function switchMaterial(){
         ovniLightsMaterial = ovniLightsMatPhong;
         trunkMaterial = trunkMatPhong;
         leafsMaterial = leafsMatPhong;
+        moonMaterial = moonPhongMaterial;
     }
     else if(toonOn){ 
         groundMaterial = groundToonMaterial;
@@ -655,6 +717,7 @@ function switchMaterial(){
         ovniLightsMaterial = ovniLightsMatToon;
         trunkMaterial = trunkMatToon;
         leafsMaterial = leafsMatToon;
+        moonMaterial = moonToonMaterial;
     }
     else if(basicOn){
         groundMaterial = groundBasicMaterial;
@@ -670,88 +733,60 @@ function switchMaterial(){
         ovniLightsMaterial = ovniLightsMatBasic;
         trunkMaterial = trunkMatBasic;
         leafsMaterial = leafsMatBasic;
+        moonMaterial = moonBasicMaterial;
     }
 
-    updateMaterials();
-}
-
-function updateMaterials(){
-    // Update ground
-    scene.traverse(obj => {
-        if (obj.isMesh && obj.geometry.type === "PlaneGeometry") {
-        if (!obj.userData.isHeightmapGround) {
-            obj.material = groundMaterial;
-            obj.material.needsUpdate = true;
-        } else {
-            obj.material = groundMaterial;
-            obj.material.needsUpdate = true;
+    for (let i = 0; i < meshList.length; i++) {
+        switch (meshList[i].userData.type) {
+            case "ground":
+                meshList[i].material = groundMaterial;
+                break;
+            case "wall":
+                meshList[i].material = wallMaterial;
+                break;
+            case "detail":
+                meshList[i].material = wallMaterialDetail;
+                break;
+            case "roof":
+                meshList[i].material = roofMaterial;
+                break;
+            case "door":
+                meshList[i].material = doorMaterial;
+                break;
+            case "window":
+                meshList[i].material = windowMaterial;
+                break;
+            case "ovniBody":
+                meshList[i].material = ovniBodyMaterial;
+                break;
+            case "ovniGlass":
+                meshList[i].material = ovniGlassMaterial;
+                break;
+            case "ovniCylinder":
+                meshList[i].material = ovniCylinderMaterial;
+                break;
+            case "ovniLight":
+                meshList[i].material = ovniLightsMaterial;
+                break;
+            case "trunk":
+                meshList[i].material = trunkMaterial;
+                break;
+            case "leafs":
+                meshList[i].material = leafsMaterial;
+                break
+            case "branch":
+                meshList[i].material = trunkMaterial;
+                break;
+            case "skyDome":
+                meshList[i].material = skyMaterial;
+                break;
+            case "moon":
+                meshList[i].material = moonMaterial;
+                break;
+                
         }
+        meshList[i].material.needsUpdate = true;
     }
-    });
-
-    // Update sky
-    scene.traverse(obj => {
-        if (obj.isMesh && obj.geometry.type === "SphereGeometry" && obj.material.side === THREE.BackSide) {
-            obj.material = skyMaterial;
-        }
-    });
-
-    // Update house
-    house.traverse(obj => {
-        if (obj.isMesh) {
-            // Door
-            if (obj.userData.type === "door") {
-                obj.material = doorMaterial;
-            }
-            // Window
-            else if (obj.userData.type === "window") {
-                obj.material = windowMaterial;
-            }
-            // Walls/roof/detail
-            else if (obj.userData.type === "wall") {
-                obj.material = wallMaterial;
-            }
-            else if (obj.userData.type === "roof") {
-                obj.material = roofMaterial;
-            }
-            else if (obj.userData.type === "detail") {
-                obj.material = wallMaterialDetail;
-            }
-        }
-    });
-
-    // Update OVNI
-    ovni.traverse(obj => {
-        if (obj.isMesh) {
-            if (obj.userData.type === "ovniBody") {
-                obj.material = ovniBodyMaterial;
-            }
-            else if (obj.userData.type === "ovniGlass") {
-                obj.material = ovniGlassMaterial;
-            }
-            else if (obj.userData.type === "ovniCylinder") {
-                obj.material = ovniCylinderMaterial;
-            } else if (obj.userData.type === "ovniLight") {
-                obj.material = ovniLightsMaterial;
-        }
-        }
-    });
-
-    // Update trees (Not working yet because of the way trees are created))
-    trees.traverse(obj => {
-        if (obj.isMesh) {
-            if (obj.userData.type === "trunk") {
-                obj.material = trunkMaterial;
-            }
-            else if (obj.userData.type === "leafs") {
-                obj.material = leafsMaterial;
-            }
-            else if (obj.userData.type === "branch") {
-                obj.material = trunkMaterial;
-            }
-        }
-    });
-
 }
 
 ////////////
@@ -806,7 +841,7 @@ function init() {
 /* DISPLAY */
 /////////////
 function render() {
-    renderer.render(scene, perspectiveCamera);
+    renderer.render(scene, activeCamera);
 }
 
 /////////////////////
@@ -815,7 +850,9 @@ function render() {
 function animate() {
     update();
     render();
-    requestAnimationFrame(animate);
+    if (!renderer.xr.isPresenting) {
+        requestAnimationFrame(animate);
+    }
 }
 
 /////////////////////
@@ -907,6 +944,14 @@ function onKeyDown(event) {
             basicOn = true;
             switchMaterial();
             break;
+        case '7':
+            usingFixedCamera = !usingFixedCamera;
+            usingPerspectiveCamera = !usingPerspectiveCamera;
+            if (usingFixedCamera) {
+                activeCamera = fixedcamera;
+            } else {
+                activeCamera = perspectiveCamera;
+            }
     }
 }
 
