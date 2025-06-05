@@ -575,31 +575,31 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     tree.scale.setScalar(scalar);
     tree.rotation.y =rot;
     trees.add(tree);
-    scene.add(tree);
-
+    
     return tree;
 }
 
 function createTrees(num,mesh) {
     const size = 360;
-
+    
     for(let i = 0; i < num; i++){
         const width = Math.floor(Math.random() * (size + 1)) - size/2;
         const length = Math.floor(Math.random() * (size + 1)) - size/2;
         const height = mesh.getHeightAt(width,length);
         const rot = Math.floor(Math.random() * 360);
         const scalar = Math.floor(Math.random() * 10) + 5;
-
+        
         
         if (houseCoords.xMin <= width && width <= houseCoords.xMax &&
             houseCoords.zMin <= length && length <= houseCoords.zMax){
                 console.log("hit!");      
                 continue
             }  
-             
-        createTree(width,height -60,length,rot,scalar); 
-    }  
-   
+            
+            createTree(width,height -60,length,rot,scalar); 
+        }  
+        
+    scene.add(trees);
 }
 
 function toggleOvniPointLights() {
