@@ -117,7 +117,7 @@ const ovniCylinderMatBasic = new THREE.MeshLambertMaterial({ color: 0x707070, sh
 const ovniGlassMatBasic = new THREE.MeshLambertMaterial({ color: 0x70c6ff, shading: THREE.FlatShading });
 const ovniLightsMatBasic = new THREE.MeshLambertMaterial({color: 0xfff838, opacity: 0.4, shading: THREE.FlatShading, emissive: 0xfff838, emissiveIntensity: 1});
 const trunkMatBasic = new THREE.MeshLambertMaterial({ color: 0xCC6600, shading: THREE.FlatShading });
-const leafsMatBasic = new THREE.MeshLambertMaterial({ color: 0x006400, shading: THREE.FlatShading });
+const leafsMatBasic = new THREE.MeshLambertMaterial({ color: 0x2b9448, shading: THREE.FlatShading });
 
 // PhongMaterial
 const wallMatPhong = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
@@ -130,7 +130,7 @@ const ovniCylinderMatPhong = new THREE.MeshPhongMaterial({ color: 0x707070 });
 const ovniGlassMatPhong = new THREE.MeshPhongMaterial({ color: 0x70c6ff });
 const ovniLightsMatPhong = new THREE.MeshPhongMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 1});
 const trunkMatPhong = new THREE.MeshPhongMaterial({ color: 0xCC6600 });
-const leafsMatPhong = new THREE.MeshPhongMaterial({ color: 0x006400 });
+const leafsMatPhong = new THREE.MeshPhongMaterial({ color: 0x2b9448 });
 
 //ToonMaterial
 const wallMatToon = new THREE.MeshToonMaterial({ color: 0xf5f5dc });
@@ -143,7 +143,7 @@ const ovniCylinderMatToon = new THREE.MeshToonMaterial({ color: 0x707070 });
 const ovniGlassMatToon = new THREE.MeshToonMaterial({ color: 0x70c6ff });
 const ovniLightsMatToon = new THREE.MeshToonMaterial({color: 0xfff838, emissive: 0xfff838, emissiveIntensity: 1});
 const trunkMatToon = new THREE.MeshToonMaterial({ color: 0xCC6600 });
-const leafsMatToon = new THREE.MeshToonMaterial({ color: 0x006400 });
+const leafsMatToon = new THREE.MeshToonMaterial({ color: 0x2b9448 });
 
 let wallMaterial = wallMatBasic;
 let wallMaterialDetail = wallMatDetailBasic;
@@ -258,8 +258,7 @@ function generateFloralTexture() {
     canvas.width = canvas.height = 512;
     const ctx = canvas.getContext('2d');  
 
-    // Fundo verde-claro
-    ctx.fillStyle = '#ccffcc';
+    ctx.fillStyle = '#2b9448';
     ctx.fillRect(0, 0, 512, 512);
 
     const colors = ['white', 'yellow', 'violet', 'lightblue'];
@@ -401,59 +400,23 @@ function createWallFace(p1, p2, p3, p4, material) {
     house.add(mesh);
 
     // Door
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(10, 15), doorMaterial);
-    door.userData.type = "door";
-    door.normalsNeedUpdate = true;
-    door.position.set(0, 7.5, 20.1);
-    house.add(door);
+    mesh = house.add(createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMaterial));
+    mesh.userData.type = "door";
+   
+    // Windows Right
+    mesh = house.add(createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMaterial ));
+    mesh.userData.type = "window";
+    mesh = house.add(createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMaterial));
+    mesh.userData.type = "window";
+    // Windows Left
+    mesh = house.add(createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMaterial));
+    mesh.userData.type = "window";
+    mesh = house.add(createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMaterial));
+    mesh.userData.type = "window";
 
-    // Windows
-    const windowGeom = new THREE.PlaneGeometry(8, 8);
-    windowGeom.normalsNeedUpdate = true;
-    
-    const winL1 = new THREE.Mesh(windowGeom, windowMaterial);
-    winL1.userData.type = "window";
-    winL1.position.set(-20.1, 13, -20);
-    winL1.rotation.y = - Math.PI / 2;
-    house.add(winL1);
-    
-    const winL2 = new THREE.Mesh(windowGeom, windowMaterial);
-    winL2.userData.type = "window";
-    winL2.position.set(-20.1, 13, 0);
-    winL2.rotation.y = - Math.PI / 2;
-    house.add(winL2);
-    
-    const winR1 = new THREE.Mesh(windowGeom, windowMaterial);
-    winR1.userData.type = "window";
-    winR1.position.set(20.1, 13, 0);
-    winR1.rotation.y = Math.PI / 2;
-    house.add(winR1);
-
-    const winR2 = new THREE.Mesh(windowGeom, windowMaterial);
-    winR2.userData.type = "window";
-    winR2.position.set(20.1, 13, -20);
-    winR2.rotation.y = Math.PI / 2;
-    house.add(winR2);
-
-    house.position.set(-100,-10,-40);
+    house.position.set(-120,-10,-40);
     house.rotateY(Math.PI / 6);
     scene.add(house);
-
-        // Door
-    // house.add(createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMatLambert));
-   
-    //     // Windows
-    // // Right Side
-    // house.add(createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMatLambert ));
-    // house.add(createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMatLambert));
-
-    // // Left Side
-    // house.add(createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMatLambert));
-    // house.add(createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMatLambert));
-
-    // house.position.set(-120,-10,-40);
-    // house.rotateY(Math.PI / 6); 
-    // scene.add(house);
 }
 
 function addBottomLight(angle) {
