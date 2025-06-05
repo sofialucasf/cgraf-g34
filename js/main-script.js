@@ -166,8 +166,8 @@ let phongOn = false;
 let toonOn = false;
 
 const houseCoords = {
-    xMin: -127 - bufferZone, 
-    xMax: -62 + bufferZone,  
+    xMin: -147 - bufferZone, 
+    xMax: -82 + bufferZone,  
     zMin: -85 - bufferZone,  
     zMax: -12 + bufferZone   
   };
@@ -181,30 +181,6 @@ function createScene() {
     scene.background = new THREE.Color(0xb0fcff);
 }
 
-function processTexture(texture){
-    const image = texture.image;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height =image.height;
-
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(image,0,0);
-
-    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const data = imageData.data;
-
-    for(let y = 0; y < canvas.height; y++){
-         for(let x = 0; x < canvas.width; x++){
-             const i =(y * canvas.width + x)*4;
-
-             const r = data[i];
-             const g = data[i + 1];
-             const b = data[i + 2];
-             const a = data[i + 3];
-         }
-    }
-}
 
 /////////////////////
 /* CREATE CAMERA(S)  */
@@ -219,6 +195,68 @@ function createCameras() {
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
+
+function createGroundFromHeightmap(url, onComplete) {
+    const width = 500;
+    const height = 500;
+    const widthSegments = 100;
+    const heightSegments = 100;
+
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.src = url;
+
+    image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image,0,0);
+        const pixelData = ctx.getImageData(0,0, image.width,image.height).data;
+
+        const geometry = new THREE.PlaneGeometry(width,height, widthSegments, heightSegments);
+        geometry.rotateX(-Math.PI/2);
+
+        const vertices = geometry.attributes.position;
+        const heightValues = [];
+
+        for(let i = 0; i < vertices.count;i++) {
+            const x = i%(widthSegments + 1);
+            const y = Math.floor(i/ (widthSegments +1));
+
+            const imgX = Math.floor((x/ widthSegments) *(image.width - 1));
+            const imgY = Math.floor((y / heightSegments) *(image.height - 1));
+            const idx = (imgY * image.width + imgX)* 4;
+
+            const pixelHeight = pixelData[idx];
+            const heightValue = (pixelHeight /255) *75;
+            vertices.setY(i, heightValue);
+            heightValues.push(heightValue);
+        }
+
+        vertices.needsUpdate = true;
+        geometry.computeVertexNormals();
+
+       
+        const material = new THREE.MeshLambertMaterial({ color: '' });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.position.y = -60;
+
+        mesh.getHeightAt = function (x, z) {
+            const halfWidth = width/2;
+            const halfHeight = height/2;
+            const col = Math.floor(((x + halfWidth) /width) * widthSegments);
+            const row = Math.floor(((z + halfHeight)/ height) * heightSegments);
+            const index = row * (widthSegments + 1) + col;
+            return heightValues[index];
+        };
+
+        if ( onComplete ) onComplete(mesh);
+    };
+
+}
 
 function generateFloralTexture() {
     const canvas = document.createElement('canvas');
@@ -420,6 +458,22 @@ function createWallFace(p1, p2, p3, p4, material) {
     house.position.set(-100,-10,-40);
     house.rotateY(Math.PI / 6);
     scene.add(house);
+
+        // Door
+    // house.add(createWallFace( [-5, 0 , 20.1] , [5, 0 , 20.1] , [5, 15 , 20.1] , [-5, 15 , 20.1], doorMatLambert));
+   
+    //     // Windows
+    // // Right Side
+    // house.add(createWallFace( [-20.1, 9 , -24] , [-20.1, 9 , -16], [-20.1, 17 , -16], [-20.1, 17 , -24], windowMatLambert ));
+    // house.add(createWallFace( [-20.1, 9 , -4] , [-20.1, 9 , 4], [-20.1, 17 , 4], [-20.1, 17 , -4], windowMatLambert));
+
+    // // Left Side
+    // house.add(createWallFace( [20.1, 9 , -16] , [20.1, 9 , -24] , [20.1, 17 , -24] , [20.1, 17 , -16], windowMatLambert));
+    // house.add(createWallFace( [20.1, 9 , 4] , [20.1, 9 , -4] , [20.1, 17 , -4] , [20.1, 17 , 4], windowMatLambert));
+
+    // house.position.set(-120,-10,-40);
+    // house.rotateY(Math.PI / 6); 
+    // scene.add(house);
 }
 
 function addBottomLight(angle) {
@@ -525,25 +579,26 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     return tree;
 }
 
-function createTrees(num) {
+function createTrees(num,mesh) {
     const size = 360;
 
     for(let i = 0; i < num; i++){
         const width = Math.floor(Math.random() * (size + 1)) - size/2;
         const length = Math.floor(Math.random() * (size + 1)) - size/2;
-        //const height = heightMap;
+        const height = mesh.getHeightAt(width,length);
         const rot = Math.floor(Math.random() * 360);
-        const scalar = Math.floor(Math.random() * 10) +5;
+        const scalar = Math.floor(Math.random() * 10) + 5;
 
+        
         if (houseCoords.xMin <= width && width <= houseCoords.xMax &&
             houseCoords.zMin <= length && length <= houseCoords.zMax){
-            console.log("hit!");      
-            continue
-        }
-       
-        createTree(width,0,length,rot,scalar); 
-    }
-    scene.add(trees);
+                console.log("hit!");      
+                continue
+            }  
+             
+        createTree(width,height -60,length,rot,scalar); 
+    }  
+   
 }
 
 function toggleOvniPointLights() {
@@ -730,15 +785,18 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     createScene();
-    createGround();
+    //createGround();
+    createGroundFromHeightmap('heightmap.png', groundMesh => {
+        scene.add(groundMesh);
+        createTrees(20,groundMesh);
+    });
     createCameras();
     createSkyDome();
     createMoon();
     createGlobalLight();
     createHouse();
     createOvni();  
-    // processTexture(heightMap);  //nao sei se isto e assim
-    createTrees(20);
+    //createTrees(20);
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
