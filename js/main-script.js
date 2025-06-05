@@ -68,23 +68,19 @@ let heightMap = new THREE.TextureLoader().load('../heightmap.png');
 let groundBasicMaterial = new THREE.MeshLambertMaterial({ 
     map: generateFloralTexture(), 
     displacementMap: heightMap,
-    displacementScale: 80,
     side: THREE.DoubleSide,
-    shading: THREE.FlatShading
 });
 
 
 let groundPhongMaterial = new THREE.MeshPhongMaterial({ 
     map: generateFloralTexture(), 
     displacementMap: heightMap,
-    displacementScale: 80,
     side: THREE.DoubleSide 
 });
 
 let groundToonMaterial = new THREE.MeshToonMaterial({ 
     map: generateFloralTexture(), 
     displacementMap: heightMap,
-    displacementScale: 80,
     side: THREE.DoubleSide 
 });
 
@@ -237,9 +233,8 @@ function createGroundFromHeightmap(url, onComplete) {
         vertices.needsUpdate = true;
         geometry.computeVertexNormals();
 
-       
-        const material = new THREE.MeshLambertMaterial({ color: '' });
-        const mesh = new THREE.Mesh(geometry, material);
+        const mesh = new THREE.Mesh(geometry, groundMaterial);
+        mesh.userData.isHeightmapGround = true;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.position.y = -60;
@@ -304,21 +299,6 @@ function generateStarrySkyTexture() {
     }
 
     return new THREE.CanvasTexture(canvas);
-}
-
-function createGround(){
-    const groundGeometry = new THREE.PlaneGeometry(500, 500, 100, 100);   
-    groundGeometry.userData.type = "ground";
-
-    groundGeometry.computeVertexNormals();
-    groundGeometry.normalsNeedUpdate = true;
-
-    let groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
-    groundMesh.castShadow = true;
-    groundMesh.receiveShadow = true;
-    scene.add(groundMesh);
-    groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.position.y = -60;
 }
 
 function createSkyDome(){
@@ -681,6 +661,7 @@ function switchMaterial(){
         trunkMaterial = trunkMatToon;
         leafsMaterial = leafsMatToon;
     }
+
     updateMaterials();
 }
 
@@ -688,8 +669,18 @@ function updateMaterials(){
     // Update ground
     scene.traverse(obj => {
         if (obj.isMesh && obj.geometry.type === "PlaneGeometry") {
+        if (!obj.userData.isHeightmapGround) {
             obj.material = groundMaterial;
+            obj.material.displacementMap = heightMap;
+            obj.material.displacementScale = 80;
+            obj.material.needsUpdate = true;
+        } else {
+            obj.material = groundMaterial;
+            obj.material.displacementMap = null;
+            obj.material.displacementScale = 0;
+            obj.material.needsUpdate = true;
         }
+    }
     });
 
     // Update sky
