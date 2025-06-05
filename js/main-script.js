@@ -575,6 +575,7 @@ function createTree(x = 0, y = 0, z = 0, rot = 0, scalar = 1) {
     tree.scale.setScalar(scalar);
     tree.rotation.y =rot;
     trees.add(tree);
+    scene.add(tree);
 
     return tree;
 }
