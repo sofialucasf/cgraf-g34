@@ -642,12 +642,18 @@ function toggleOvniPointLights() {
     if (pointLightOn) {
         bottomPointLights.forEach((light, index) => {
             light.intensity = 150;
+            ovniLightsMatLambert.emissiveIntensity = 1;
+            ovniLightsMatPhong.emissiveIntensity = 1;
+            ovniLightsMatToon.emissiveIntensity = 1;
             ovniLightsMaterial.emissiveIntensity = 1;        
         });
     }
     else {
         bottomPointLights.forEach((light, index) => {
             light.intensity = 0;
+            ovniLightsMatLambert.emissiveIntensity = 0;
+            ovniLightsMatPhong.emissiveIntensity = 0;
+            ovniLightsMatToon.emissiveIntensity = 0;
             ovniLightsMaterial.emissiveIntensity = 0;
         });
     }
