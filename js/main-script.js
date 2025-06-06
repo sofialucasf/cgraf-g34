@@ -830,7 +830,6 @@ function init() {
     createSkyDome();
     createMoon();
     createGlobalLight();
-    //createHouse();
     createOvni();  
     renderer.setAnimationLoop(() => {
         update();
@@ -973,4 +972,3 @@ function onKeyUp(event) {
 }
 
 init();
-animate();
