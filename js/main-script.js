@@ -8,9 +8,8 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 //////////////////////
 
 let scene, renderer;
-let activeCamera ,perspectiveCamera, fixedcamera, controls;
+let activeCamera ,perspectiveCamera, stereoCamera, fixedcamera, controls;
 
-let usingStereoCamera = false;
 let usingPerspectiveCamera = true;
 let usingFixedCamera = false;
 
@@ -816,6 +815,9 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    renderer.xr.enabled = true;
+    document.body.appendChild(VRButton.createButton(renderer));
     createScene();
     createGroundFromHeightmap('heightmap.png', groundMesh => {
         scene.add(groundMesh);
@@ -827,7 +829,10 @@ function init() {
     createGlobalLight();
     createHouse();
     createOvni();  
-    //createTrees(20);
+    renderer.setAnimationLoop(() => {
+        update();
+        render();
+    });
 
     controls = new OrbitControls(perspectiveCamera, renderer.domElement);
 
@@ -845,17 +850,6 @@ function render() {
 }
 
 /////////////////////
-/* RENDER & ANIMATE */
-/////////////////////
-function animate() {
-    update();
-    render();
-    if (!renderer.xr.isPresenting) {
-        requestAnimationFrame(animate);
-    }
-}
-
-/////////////////////
 /* RESIZE HANDLER  */
 /////////////////////
 function onWindowResize() {
@@ -865,6 +859,9 @@ function onWindowResize() {
 
     perspectiveCamera.aspect = aspect;
     perspectiveCamera.updateProjectionMatrix();
+
+    fixedcamera.aspect = aspect;
+    fixedcamera.updateProjectionMatrix();
 }
 
 /////////////////////
